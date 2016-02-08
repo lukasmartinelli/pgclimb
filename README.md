@@ -2,7 +2,7 @@
 
 <img align="right" alt="Climbing elephant" src="logo.png" />
 
-Generate JSON, CSV, XLSX, YAML, XML, Markdown or HTML reports from PostgreSQL to publish data
+Generate JSON, CSV, XLSX, XML reports from PostgreSQL to publish data
 sets or for creating readonly APIs.
 
 `pgreport` has solid support for JSON and allows more sophisticated workflows
