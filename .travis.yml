@@ -1,0 +1,14 @@
+language: go
+sudo: false
+addons:
+  postgresql: 9.3
+go:
+  - 1.4
+  - tip
+install:
+  - go get github.com/codegangsta/cli
+  - go get github.com/lib/pq
+  - go get github.com/kennygrant/sanitize
+  - go get github.com/cheggaaa/pb
+script:
+  - go install
