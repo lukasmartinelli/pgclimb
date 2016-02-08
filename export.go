@@ -56,11 +56,15 @@ func export(query string, connStr string, encoder RowEncoder) error {
 			}
 			defer file.Close()
 
-			encoder.Encode(values)
+			if err = encoder.Encode(values); err != nil {
+				return err
+			}
 			file.Sync()
 			log.Printf("%s\n", filename)
 		} else {
-			encoder.Encode(values)
+			if err = encoder.Encode(values); err != nil {
+				return err
+			}
 		}
 	}
 
