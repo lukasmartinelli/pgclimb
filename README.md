@@ -8,6 +8,12 @@ sets or for creating readonly APIs.
 `pgreport` has solid support for JSON and allows more sophisticated workflows
 without falling back to scriping language compared to just using `psql`.
 
+Use Cases:
+- Publish data sets
+- Transform data for graphing it with spreadsheet software or JavaScript libraries
+- Generate readonly JSON APIs
+- Get data out after ETL process
+
 ## Generate a readonly API
 
 Let's generate a `communities.json` files containing an overview of all
