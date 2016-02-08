@@ -2,7 +2,7 @@ package main
 
 import (
 	"encoding/json"
-	"log"
+	"os"
 )
 
 // Try to JSON decode the bytes
@@ -32,12 +32,30 @@ func exportJSON(query string, connStr string) error {
 	}
 
 	rc := NewMapStringScan(columnNames)
+
+	supportsFilename := func() bool {
+		for _, colName := range rc.colNames {
+			if colName == "filename" {
+				return true
+			}
+		}
+		return false
+	}()
+
 	for rows.Next() {
 		if err := rc.Update(rows); err != nil {
 			return err
 		}
-		cv := rc.Get()
-		log.Printf("%#v\n\n", cv)
+
+		encoder := json.NewEncoder(os.Stdout)
+		values := rc.Get()
+
+		if supportsFilename {
+			delete(values, "filename")
+			encoder.Encode(values)
+		} else {
+			encoder.Encode(values)
+		}
 	}
 
 	err = rows.Err()

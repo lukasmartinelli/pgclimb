@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/codegangsta/cli"
+	_ "github.com/lib/pq"
 )
 
 //setup a database connection and create the import schema
