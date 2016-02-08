@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"log"
 	"os"
 )
 
@@ -47,13 +48,23 @@ func exportJSON(query string, connStr string) error {
 			return err
 		}
 
-		encoder := json.NewEncoder(os.Stdout)
 		values := rc.Get()
-
 		if supportsFilename {
+			filename := values["filename"]
 			delete(values, "filename")
+
+			file, err := os.Create(filename)
+			if err != nil {
+				return err
+			}
+			defer file.Close()
+
+			encoder := json.NewEncoder(file)
 			encoder.Encode(values)
+			file.Sync()
+			log.Printf("%s\n", filename)
 		} else {
+			encoder := json.NewEncoder(os.Stdout)
 			encoder.Encode(values)
 		}
 	}
