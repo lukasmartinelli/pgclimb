@@ -2,10 +2,13 @@
 
 <img align="right" alt="Climbing elephant" src="logo.png" />
 
-Generate JSON reports from PostgreSQL to create readonly APIs
-or for publishing open data sets.
+Generate JSON, CSV, XLSX, YAML, XML, Markdown or HTML reports from PostgreSQL to publish data
+sets or for creating readonly APIs.
 
-## Example
+`pgreport` has solid support for JSON and allows more sophisticated workflows
+without falling back to scriping language compared to just using `psql`.
+
+## Generate a readonly API
 
 Let's generate a `communities.json` files containing an overview of all
 files and a file for each community containing the details.
@@ -14,7 +17,7 @@ Generate a single document.
 
 ```bash
 pgreport "SELECT 'communities.json' AS filename, \\
-                 json_agg(t) AS document \\
+          json_agg(t) AS document \\
           FROM (SELECT bfs_id, name FROM communities) AS t"
 ```
 
@@ -25,6 +28,36 @@ pgreport "SELECT 'communities/' || bfs_id || '.json' AS filename, \\
                  json_agg(c) AS document \\
           FROM communities) AS c"
 ```
+
+## Generate CSV files
+
+Create a single TSV file containing all flat data. You cannot represent
+structured data in TSV files. You can fallback to create hierarchies
+using different files.
+
+`pgreport` will automatically detect that you want to create a TSV file and
+will choose sensible defaults for you.
+
+```bash
+pgreport "SELECT 'communities.tsv' AS filename, \\
+                 bfs_id, name \\
+          FROM communities"
+```
+
+## Generate XML files
+
+But XML is dead? Many applications still prefer XML as a data format and if you don't
+have to support a specific schema or want to get input for XSLT `pgreport` can generate
+the necessary files for you. You can either rely on default XML output
+or build your own XML document with [XML functions in PostgreSQL](https://wiki.postgresql.org/wiki/XML_Support).
+
+```bash
+pgreport "SELECT 'communities.tsv' AS filename, \\
+                 bfs_id, name \\
+          FROM communities"
+```
+
+
 
 ## Install
 
@@ -70,6 +103,13 @@ name        | default     | description
 `DB_SCHEMA` | `import`    | schema to create tables for
 `DB_USER`   | `postgres`  | database user
 `DB_PASS`   |             | password (or empty if none)
+
+## Personal Motivation
+
+I use PostgreSQL in most ETL workflows to consolidate, aggregate and cleanup data.
+After doing that I want to get the data out again which previously relied on
+a lot of redundant Python code code projects all of which has now been replaces
+with `pgreport`.
 
 ## Advanced Use Cases
 
