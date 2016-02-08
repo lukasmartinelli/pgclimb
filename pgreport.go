@@ -64,7 +64,7 @@ func main() {
 		}
 
 		connStr := parseConnStr(c)
-		err := exportJSON(query, connStr)
+		err := export(query, connStr)
 		exitOnError(err)
 	}
 
