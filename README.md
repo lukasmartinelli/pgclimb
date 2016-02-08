@@ -2,8 +2,8 @@
 
 <img align="right" alt="Climbing elephant" src="logo.png" />
 
-Generate JSON and CSV reports from PostgreSQL to create readonly APIs
-and publish open data sets.
+Generate JSON reports from PostgreSQL to create readonly APIs
+or for publishing open data sets.
 
 ## Example
 
@@ -13,16 +13,17 @@ files and a file for each community containing the details.
 Generate a single document.
 
 ```bash
-pgreport json "SELECT 'communities.json' AS filename, json_agg(t) AS document \\
-                FROM (SELECT bfs_id, name FROM communities) AS t"
+pgreport "SELECT 'communities.json' AS filename, \\
+                 json_agg(t) AS document \\
+          FROM (SELECT bfs_id, name FROM communities) AS t"
 ```
 
-Generate multiple documents.
+Generate multiple documents with the details.
 
 ```bash
-pgreport json "SELECT 'communities/' || bfs_id || '.json' AS filename, \\
-                      json_agg(c) AS document \\
-                FROM communities) AS c"
+pgreport "SELECT 'communities/' || bfs_id || '.json' AS filename, \\
+                 json_agg(c) AS document \\
+          FROM communities) AS c"
 ```
 
 ## Install
@@ -86,7 +87,6 @@ You might omit the quoting character if it is not necessary.
 ## Alternatives
 
 - [ ] Research alternatives
-
 
 ## Cross-compiling
 
