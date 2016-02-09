@@ -14,6 +14,30 @@ Use Cases:
 - Generate readonly JSON APIs
 - Get data out after ETL process
 
+## Examples
+
+## Generate JSON Lines
+
+[Newline delimited JSON](http://jsonlines.org/) is a good format to exchange
+structured data in large quantities.
+
+`pgreport` supports rendering JSON output for arbitrary queries. If you
+want to export more complicated structured you can create JSON aggregation
+in PostgreSQL and `pgreport` will handle it just fine.
+
+Let's query communities join an additional birth rate table.
+
+```bash
+pgreport jsonlines "SELECT id, name, \\
+    (SELECT array_to_json(array_agg(t)) FROM ( \\
+            SELECT year, births FROM public.births \\
+            WHERE community_id = c.id \\
+            ORDER BY year ASC \\
+        ) AS t \\
+    ) AS births, \\
+    FROM communities) AS c"
+```
+
 ## Generate a readonly API
 
 Let's generate a `communities.json` files containing an overview of all
