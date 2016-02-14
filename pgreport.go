@@ -3,9 +3,23 @@ package main
 import (
 	"log"
 	"os"
+	"strings"
 
 	"github.com/codegangsta/cli"
 )
+
+func changeHelpTemplateArgs(args string) {
+	cli.CommandHelpTemplate = strings.Replace(cli.CommandHelpTemplate, "[arguments...]", args, -1)
+}
+
+func parseQuery(c *cli.Context, command string) string {
+	query := c.Args().First()
+	if query == "" {
+		cli.ShowCommandHelp(c, command)
+		os.Exit(1)
+	}
+	return query
+}
 
 func exitOnError(err error) {
 	log.SetFlags(0)
@@ -56,16 +70,40 @@ func main() {
 		},
 	}
 
-	app.Action = func(c *cli.Context) {
-		query := c.Args().First()
-		if query == "" {
-			cli.ShowAppHelp(c)
-			os.Exit(1)
-		}
-
-		connStr := parseConnStr(c)
-		err := export(query, connStr, NewCsvEncoder())
-		exitOnError(err)
+	app.Commands = []cli.Command{
+		{
+			Name:  "jsonlines",
+			Usage: "Export newline-delimited JSON objects",
+			Action: func(c *cli.Context) {
+				changeHelpTemplateArgs("<query>")
+				query := parseQuery(c, "jsonlines")
+				connStr := parseConnStr(c)
+				err := export(query, connStr, NewJsonEncoder())
+				exitOnError(err)
+			},
+		},
+		{
+			Name:  "csv",
+			Usage: "Export CSV",
+			Action: func(c *cli.Context) {
+				changeHelpTemplateArgs("<query>")
+				query := parseQuery(c, "csv")
+				connStr := parseConnStr(c)
+				err := export(query, connStr, NewCsvEncoder())
+				exitOnError(err)
+			},
+		},
+		{
+			Name:  "xml",
+			Usage: "Export XML",
+			Action: func(c *cli.Context) {
+				changeHelpTemplateArgs("<query>")
+				query := parseQuery(c, "xml")
+				connStr := parseConnStr(c)
+				err := export(query, connStr, NewXmlEncoder())
+				exitOnError(err)
+			},
+		},
 	}
 
 	app.Run(os.Args)
