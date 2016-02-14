@@ -1,6 +1,7 @@
 package main
 
 import (
+	"io/ioutil"
 	"log"
 	"os"
 	"strings"
@@ -12,13 +13,29 @@ func changeHelpTemplateArgs(args string) {
 	cli.CommandHelpTemplate = strings.Replace(cli.CommandHelpTemplate, "[arguments...]", args, -1)
 }
 
+func isSqlFile(arg string) bool {
+	hasSelect := strings.HasPrefix(strings.ToLower(arg), "select")
+	hasSqlExtension := strings.HasSuffix(arg, ".sql")
+	return hasSqlExtension && !hasSelect
+}
+
 func parseQuery(c *cli.Context, command string) string {
-	query := c.Args().First()
-	if query == "" {
+	arg := c.Args().First()
+	if arg == "" {
 		cli.ShowCommandHelp(c, command)
 		os.Exit(1)
 	}
-	return query
+
+	if isSqlFile(arg) {
+		filename := arg
+		query, err := ioutil.ReadFile(filename)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		return string(query)
+	} else {
+		return arg
+	}
 }
 
 func exitOnError(err error) {
