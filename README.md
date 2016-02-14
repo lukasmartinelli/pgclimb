@@ -2,17 +2,20 @@
 
 <img align="right" alt="Climbing elephant" src="logo.png" />
 
-Generate JSON, CSV, XLSX, XML reports from PostgreSQL to publish data
-sets or for creating readonly APIs.
+A PostgreSQL utility to export data into different data formats with
+support for templates and an easier workflow than simply using `psql`.
 
-`pgreport` has solid support for JSON and allows more sophisticated workflows
-without falling back to scriping language compared to just using `psql`.
+Features:
+- Export data to JSON, JSON Lines, CSV, XLSX, XML
+- Templates are supported for anything else (HTML, Markdown, Text)
+- Advanced directory structures for generating e.g. readonly JSON APIs or multiple CSV files
 
 Use Cases:
+- `psql` alternative for getting data out of PostgreSQL
 - Publish data sets
 - Transform data for graphing it with spreadsheet software or JavaScript libraries
 - Generate readonly JSON APIs
-- Get data out after ETL process
+- Generate a web page 
 
 ## Examples
 
