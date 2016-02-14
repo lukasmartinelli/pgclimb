@@ -104,6 +104,17 @@ func main() {
 				exitOnError(err)
 			},
 		},
+		{
+			Name:  "xlsx",
+			Usage: "Export XLSX spreadsheets",
+			Action: func(c *cli.Context) {
+				changeHelpTemplateArgs("<query>")
+				query := parseQuery(c, "xlsx")
+				connStr := parseConnStr(c)
+				err := export(query, connStr, NewXlsxEncoder())
+				exitOnError(err)
+			},
+		},
 	}
 
 	app.Run(os.Args)
