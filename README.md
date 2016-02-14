@@ -146,16 +146,18 @@ with `pgreport`.
 
 ## Advanced Use Cases
 
-### Custom delimiter
+### Load SQL from File
 
-Quite often you want to specify a custom delimiter (default: `,`).
+If you have a long SQL statement to select your data you can read
+the query from a file. Instead of passing a query to `pgreport` you 
+pass a filename ending with `.sql`.
 
 ```bash
-pgfutter csv -d "\t" traffic_violations.csv
+# Store query in file
+echo 'SELECT * FROM communities' > myquery.sql
+# Execute query from file
+pgreport jsonlines myquery.sql
 ```
-
-You have to use `"` as a quoting character and `\` as escape character.
-You might omit the quoting character if it is not necessary.
 
 ## Alternatives
 
