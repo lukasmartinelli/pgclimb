@@ -6,8 +6,8 @@ A PostgreSQL utility to export data into different data formats with
 support for templates and an easier workflow than simply using `psql`.
 
 Features:
-- Export data to JSON, JSON Lines, CSV, XLSX, XML
-- Templates are supported for anything else (HTML, Markdown, Text)
+- Export data to [JSON](#json-document), [JSON Lines](#json-lines), [CSV](#csv-and-tsv), [XLSX](#xlsx), [XML](#xml)
+- [Templates](#templates) are supported for anything else (HTML, Markdown, Text)
 - Advanced directory structures for generating e.g. readonly JSON APIs or multiple CSV files
 
 Use Cases:
@@ -114,10 +114,9 @@ of `pgclimb` or build your own XML document with [XML functions in PostgreSQL](h
 pgclimb xml "SELECT * FROM employee_salaries"
 ```
 
-### Template
+## Templates
 
 This is the most advanced option and allows you to implement a lot of other formats and endpoints for free.
-
 Because the template and query in this example are larger we fall back to using files instead of passing arguments.
 
 Create a template `salaries.tpl`.
