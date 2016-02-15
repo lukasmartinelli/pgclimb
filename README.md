@@ -51,6 +51,7 @@ yourself](https://github.com/lukasmartinelli/pgclimb/releases/latest).
 ## Supported Formats
 
 The example queries operate on the open data [employee salaries of Montgomery County Maryland](https://data.montgomerycountymd.gov/Human-Resources/Employee-Salaries-2014/54rh-89p8).
+To connect to your beloved PostgreSQL database set the [appropriate connection options](#database-connection).
 
 ## CSV and TSV
 
@@ -216,6 +217,9 @@ pgclimb jsonlines "SELECT id, name, \\
     FROM communities) AS c"
 ```
 
+# Contribute 
+
+
 ## Cross-compiling
 
 We use [gox](https://github.com/mitchellh/gox) to create distributable
@@ -224,3 +228,8 @@ binaries for Windows, OSX and Linux.
 ```bash
 docker run --rm -v "$(pwd)":/usr/src/pgclimb -w /usr/src/pgclimb tcnksm/gox:1.4.2-light
 ```
+
+## Integration Tests
+
+Run `test.sh` to run integration tests of the program with a PostgreSQL server. Take a look at the
+`.travis.yml`.
