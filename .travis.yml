@@ -6,8 +6,11 @@ go:
   - 1.4
   - tip
 install:
-  - go get github.com/codegangsta/cli && go get github.com/lib/pq && go get github.com/jmoiron/sqlx && go get github.com/tealeg/xlsx
-  - go install pgfutter
+  - go get github.com/codegangsta/cli
+  - go get github.com/lib/pq
+  - go get github.com/jmoiron/sqlx
+  - go get github.com/tealeg/xlsx
+  - go get github.com/lukasmartinelli/pgfutter
 script:
   - go install
   - ./test.sh
