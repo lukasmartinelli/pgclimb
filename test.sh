@@ -68,14 +68,14 @@ function import_github_samples() {
 function test_json_export() {
     local query="SELECT e.data->'repo'->>'name' as name, json_agg(c->>'sha') as commmits FROM github_events AS e, json_array_elements(e.data->'payload'->'commits') AS c WHERE e.data->>'type' = 'PushEvent' GROUP BY e.data->'repo'->>'name'"
     local filename="push_events.json"
-    pgreport --db $DB_NAME --user $DB_USER jsonlines "$query" > $filename
+    pgclimb --db $DB_NAME --user $DB_USER jsonlines "$query" > $filename
     echo "Exported JSON to $filename"
 }
 
 function test_csv_export() {
 local query="SELECT position_title, COUNT(*) AS employees, round(AVG(replace(current_annual_salary, '$', '')::numeric)) AS avg_salary FROM employee_salaries GROUP BY position_title ORDER BY 3 DESC"
     local filename="montgomery_average_salaries.csv"
-    pgreport --db $DB_NAME --user $DB_USER csv "$query" > $filename
+    pgclimb --db $DB_NAME --user $DB_USER csv "$query" > $filename
     echo "Exported CSV to $filename"
 }
 
