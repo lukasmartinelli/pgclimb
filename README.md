@@ -1,4 +1,4 @@
-# pgclimb ![License](https://img.shields.io/badge/license-MIT%20License-blue.svg)
+# pgclimb [![Build Status](https://travis-ci.org/lukasmartinelli/pgclimb.svg?branch=master)](https://travis-ci.org/lukasmartinelli/pgclimb) [![Go Report Card](https://goreportcard.com/badge/github.com/lukasmartinelli/pgclimb)](https://goreportcard.com/report/github.com/lukasmartinelli/pgclimb) ![License](https://img.shields.io/badge/license-MIT%20License-blue.svg)
 
 <img align="right" alt="Climbing elephant" src="logo.png" />
 
