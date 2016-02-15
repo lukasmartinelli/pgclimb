@@ -1,10 +1,12 @@
-package main
+package export
 
 import (
 	"fmt"
 	"log"
 	"os"
 	"time"
+
+	"github.com/lukasmartinelli/pgclimb/pg"
 )
 
 // Supports encoding a row in different formats
@@ -12,8 +14,8 @@ type RowEncoder interface {
 	Encode(map[string]interface{}) error
 }
 
-func export(query string, connStr string, encoder RowEncoder) error {
-	db, err := connect(connStr)
+func Export(query string, connStr string, encoder RowEncoder) error {
+	db, err := pg.Connect(connStr)
 	if err != nil {
 		return err
 	}

@@ -1,4 +1,4 @@
-package main
+package pg
 
 import (
 	"fmt"
@@ -10,7 +10,7 @@ import (
 )
 
 //setup a database connection and create the import schema
-func connect(connStr string) (*sqlx.DB, error) {
+func Connect(connStr string) (*sqlx.DB, error) {
 	db, err := sqlx.Open("postgres", connStr)
 	if err != nil {
 		return db, err
@@ -25,7 +25,7 @@ func connect(connStr string) (*sqlx.DB, error) {
 }
 
 //parse sql connection string from cli flags
-func parseConnStr(c *cli.Context) string {
+func ParseConnStr(c *cli.Context) string {
 	otherParams := "sslmode=disable connect_timeout=5"
 	if c.GlobalBool("ssl") {
 		otherParams = "sslmode=require connect_timeout=5"
