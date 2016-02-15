@@ -12,3 +12,4 @@ install:
   - go get github.com/tealeg/xlsx
 script:
   - go install
+  - ./test.sh
