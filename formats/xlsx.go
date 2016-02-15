@@ -1,4 +1,4 @@
-package main
+package formats
 
 import (
 	"github.com/tealeg/xlsx"
