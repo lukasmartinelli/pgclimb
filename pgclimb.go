@@ -47,9 +47,9 @@ func exitOnError(err error) {
 
 func main() {
 	app := cli.NewApp()
-	app.Name = "pgreport"
+	app.Name = "pgclimb"
 	app.Version = "0.1"
-	app.Usage = "Generate reports from PostgreSQL"
+	app.Usage = "Export data from PostgreSQL into different data formats"
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
 			Name:   "dbname, db",

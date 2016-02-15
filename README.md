@@ -15,82 +15,7 @@ Use Cases:
 - Publish data sets
 - Transform data for graphing it with spreadsheet software or JavaScript libraries
 - Generate readonly JSON APIs
-- Generate a web page 
-
-## Examples
-
-## Generate JSON Lines
-
-[Newline delimited JSON](http://jsonlines.org/) is a good format to exchange
-structured data in large quantities.
-
-`pgclimb` supports rendering JSON output for arbitrary queries. If you
-want to export more complicated structured you can create JSON aggregation
-in PostgreSQL and `pgclimb` will handle it just fine.
-
-Let's query communities join an additional birth rate table.
-
-```bash
-pgclimb jsonlines "SELECT id, name, \\
-    (SELECT array_to_json(array_agg(t)) FROM ( \\
-            SELECT year, births FROM public.births \\
-            WHERE community_id = c.id \\
-            ORDER BY year ASC \\
-        ) AS t \\
-    ) AS births, \\
-    FROM communities) AS c"
-```
-
-## Generate a readonly API
-
-Let's generate a `communities.json` files containing an overview of all
-files and a file for each community containing the details.
-
-Generate a single document.
-
-```bash
-pgclimb "SELECT 'communities.json' AS filename, \\
-          json_agg(t) AS document \\
-          FROM (SELECT bfs_id, name FROM communities) AS t"
-```
-
-Generate multiple documents with the details.
-
-```bash
-pgclimb "SELECT 'communities/' || bfs_id || '.json' AS filename, \\
-                 json_agg(c) AS document \\
-          FROM communities) AS c"
-```
-
-## Generate CSV files
-
-Create a single TSV file containing all flat data. You cannot represent
-structured data in TSV files. You can fallback to create hierarchies
-using different files.
-
-`pgclimb` will automatically detect that you want to create a TSV file and
-will choose sensible defaults for you.
-
-```bash
-pgclimb "SELECT 'communities.tsv' AS filename, \\
-                 bfs_id, name \\
-          FROM communities"
-```
-
-## Generate XML files
-
-But XML is dead? Many applications still prefer XML as a data format and if you don't
-have to support a specific schema or want to get input for XSLT `pgclimb` can generate
-the necessary files for you. You can either rely on default XML output
-or build your own XML document with [XML functions in PostgreSQL](https://wiki.postgresql.org/wiki/XML_Support).
-
-```bash
-pgclimb "SELECT 'communities.tsv' AS filename, \\
-                 bfs_id, name \\
-          FROM communities"
-```
-
-
+- Generate a web page
 
 ## Install
 
@@ -123,6 +48,107 @@ go get github.com/lukasmartinelli/pgclimb
 If you are using Windows or 32-bit architectures you need to [download the appropriate binary
 yourself](https://github.com/lukasmartinelli/pgclimb/releases/latest).
 
+## Supported Formats
+
+The example queries operate on the open data [employee salaries of Montgomery County Maryland](https://data.montgomerycountymd.gov/Human-Resources/Employee-Salaries-2014/54rh-89p8).
+
+## CSV and TSV
+
+Exporting CSV and TSV files is very similar to using `psql` and the `COPY TO` statement. You can customize the delimiter which is `,` by default.
+
+```bash
+# Create a standard CSV file
+pgclimb csv "SELECT * FROM employee_salaries"
+# Create CSV file with custom delimiter and header row
+pgclimb csv "SELECT full_name, position_title FROM employee_salaries" \
+     --delimiter ";" --header
+# Create TSV files
+pgclimb tsv "SELECT position_title, COUNT(*) FROM employee_salaries GROUP BY position_title"
+```
+
+### JSON Document
+
+Creating a single JSON document of a query is especially helpful if you
+interface with other programs like providing data for JavaScript or creating
+a readonly JSON API. You don't need to `json_agg` your objects, `pgclimb` will
+automatically serialize the JSON for you - it does however supported nested JSON objects for more complicated queries.
+
+```bash
+# Query all salaries into JSON array
+pgclimb json "SELECT * FROM employee_salaries"
+# Render all employees of a position as nested JSON object
+pgclimb json "SELECT s.position_title, json_agg(s) FROM employee_salaries s GROUP BY s.position_title"
+```
+
+### JSON Lines
+
+[Newline delimited JSON](http://jsonlines.org/) is a good format to exchange
+structured data in large quantities which does not fit well into the CSV format.
+
+```bash
+# Query all salaries into JSON array
+pgclimb jsonlines "SELECT * FROM employee_salaries"
+# Render all employees of a position as nested JSON object
+pgclimb jsonlines "SELECT s.position_title, json_agg(s) FROM employee_salaries s GROUP BY s.position_title"
+```
+
+### XLSX
+
+Excel files are useful for non programmers to directly work with the data
+and create graphs and filters. You can also fill different data into different spreedsheets.
+
+```bash
+# Store all salaries in XLSX file
+pgclimb xlsx "SELECT * FROM employee_salaries"
+# Explicitly name sheet name
+pgclimb xlsx "SELECT * FROM employee_salaries" --sheet "salaries"
+```
+
+### XML
+
+You can output XML to process it with other programs or a XLST stylesheet.
+If want more control over the XML output you can use the templating functionality
+of `pgclimb` or build your own XML document with [XML functions in PostgreSQL](https://wiki.postgresql.org/wiki/XML_Support).
+
+```bash
+pgclimb xml "SELECT * FROM employee_salaries"
+```
+
+### Template
+
+This is the most advanced option and allows you to implement a lot of other formats and endpoints for free.
+
+Because the template and query in this example are larger we fall back to using files instead of passing arguments.
+
+Create a template `salaries.tpl`.
+
+```html
+<!DOCTYPE html>
+<html>
+    <head><title>Montgomery County MD Employees</title></head>
+    <body>
+        <h2>Employees</h2>
+        <ul>
+            {{range .}}
+            <li>{{.full_name}}</li>
+            {{end}}
+        </ul>
+    </body>
+</html>
+```
+
+Create a query file `query.sql`
+
+```sql
+SELECT * FROM employee_salaries
+```
+
+And now run the template.
+
+```
+pgclimb template salaries.tpl query.sql
+```
+
 ## Database Connection
 
 Database connection details can be provided via environment variables
@@ -136,13 +162,6 @@ name        | default     | description
 `DB_SCHEMA` | `import`    | schema to create tables for
 `DB_USER`   | `postgres`  | database user
 `DB_PASS`   |             | password (or empty if none)
-
-## Personal Motivation
-
-I use PostgreSQL in most ETL workflows to consolidate, aggregate and cleanup data.
-After doing that I want to get the data out again which previously relied on
-a lot of redundant Python code code projects all of which has now been replaces
-with `pgclimb`.
 
 ## Advanced Use Cases
 
@@ -159,9 +178,44 @@ echo 'SELECT * FROM communities' > myquery.sql
 pgclimb jsonlines myquery.sql
 ```
 
-## Alternatives
+## Control filename via column data
 
-- [ ] Research alternatives
+Let's generate a `communities.json` files containing an overview of all
+files and a file for each community containing the details.
+
+Generate a single document.
+
+```bash
+pgclimb json "SELECT 'communities.json' AS filename, \\
+          json_agg(t) AS document \\
+          FROM (SELECT bfs_id, name FROM communities) AS t" --fname-field 'filename'
+```
+
+Generate multiple documents with the details.
+
+```bash
+pgclimb json "SELECT 'communities/' || bfs_id || '.json' AS filename, \
+                 json_agg(c) AS document \
+          FROM communities) AS c" --fname-field 'filename'
+```
+
+## Using JSON aggregation
+
+This is not a `pgclimb` feature but shows you how to create more complex
+JSON objects by using the [PostgreSQL JSON functions](http://www.postgresql.org/docs/9.5/static/functions-json.html).
+
+Let's query communities and join an additional birth rate table.
+
+```bash
+pgclimb jsonlines "SELECT id, name, \\
+    (SELECT array_to_json(array_agg(t)) FROM ( \\
+            SELECT year, births FROM public.births \\
+            WHERE community_id = c.id \\
+            ORDER BY year ASC \\
+        ) AS t \\
+    ) AS births, \\
+    FROM communities) AS c"
+```
 
 ## Cross-compiling
 

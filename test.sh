@@ -13,7 +13,7 @@ readonly MONTGOMERY_SALARIES_SAMPLE="$SAMPLES_DIR/employee_salaries.csv"
 
 function download_montgomery_county_samples() {
     if [ ! -f "$MONTGOMERY_SALARIES_SAMPLE" ]; then
-        wget -O "$MONTGOMERY_SALARIES_SAMPLE" https://data.montgomerycountymd.gov/api/views/54rh-89p8/rows.csv && true
+        wget -O "$MONTGOMERY_SALARIES_SAMPLE" https://data.montgomerycountymd.gov/api/views/54rh-89p8/rows.csv
     fi
 }
 
