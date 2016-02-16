@@ -5,6 +5,8 @@
 A PostgreSQL utility to export data into different data formats with
 support for templates and an easier workflow than simply using `psql`.
 
+> **Disclaimer: pgclimb is a work in progress!**
+
 Features:
 - Export data to [JSON](#json-document), [JSON Lines](#json-lines), [CSV](#csv-and-tsv), [XLSX](#xlsx), [XML](#xml)
 - [Templates](#templates) are supported for anything else (HTML, Markdown, Text)
