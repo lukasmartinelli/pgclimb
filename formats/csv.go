@@ -10,9 +10,9 @@ type CsvFormat struct {
 	writer *csv.Writer
 }
 
-func NewCsvFormat() *CsvFormat {
+func NewCsvFormat(delimiter rune) *CsvFormat {
 	writer := csv.NewWriter(os.Stdout)
-	writer.Comma = '\t'
+	writer.Comma = delimiter
 	return &CsvFormat{writer}
 }
 

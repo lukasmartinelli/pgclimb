@@ -119,7 +119,18 @@ func main() {
 				changeHelpTemplateArgs("<query>")
 				query := parseQuery(c, "csv")
 				connStr := pg.ParseConnStr(c)
-				err := formats.Export(query, connStr, formats.NewCsvFormat())
+				err := formats.Export(query, connStr, formats.NewCsvFormat(';'))
+				exitOnError(err)
+			},
+		},
+		{
+			Name:  "tsv",
+			Usage: "Export TSV",
+			Action: func(c *cli.Context) {
+				changeHelpTemplateArgs("<query>")
+				query := parseQuery(c, "tsv")
+				connStr := pg.ParseConnStr(c)
+				err := formats.Export(query, connStr, formats.NewCsvFormat('\t'))
 				exitOnError(err)
 			},
 		},
