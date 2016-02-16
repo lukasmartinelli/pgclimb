@@ -119,7 +119,7 @@ func main() {
 				changeHelpTemplateArgs("<query>")
 				query := parseQuery(c, "xml")
 				connStr := pg.ParseConnStr(c)
-				err := formats.Export(query, connStr, formats.NewXmlFormat())
+				err := formats.Export(query, connStr, formats.NewXMLFormat())
 				exitOnError(err)
 			},
 		},
