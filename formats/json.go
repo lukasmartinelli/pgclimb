@@ -5,20 +5,49 @@ import (
 	"os"
 )
 
-type JSONFormat struct {
+type JSONArrayFormat struct {
+	//Rows are stored in Memory until they are serialized into one Document
+	//this only works because JSON documents are not supposed to be big
+	//which would make them complicated to parse as well
+	rows    []map[string]interface{}
 	encoder *json.Encoder
 }
 
-func NewJSONFormat() *JSONFormat {
-	return &JSONFormat{json.NewEncoder(os.Stdout)}
+type JSONLinesFormat struct {
+	encoder *json.Encoder
+}
+
+func NewJSONArrayFormat() *JSONArrayFormat {
+	return &JSONArrayFormat{make([]map[string]interface{}, 0), json.NewEncoder(os.Stdout)}
+}
+
+func NewJSONLinesFormat() *JSONLinesFormat {
+	return &JSONLinesFormat{json.NewEncoder(os.Stdout)}
 }
 
 // Writing header for JSON is a NOP
-func (e *JSONFormat) WriteHeader(columns []string) error {
+func (e *JSONArrayFormat) WriteHeader(columns []string) error {
 	return nil
 }
 
-func (e *JSONFormat) WriteRow(rows map[string]interface{}) error {
+func (e *JSONArrayFormat) Flush() error {
+	err := e.encoder.Encode(e.rows)
+	return err
+}
+
+// Writing header for JSON is a NOP
+func (e *JSONLinesFormat) WriteHeader(columns []string) error {
+	return nil
+}
+
+func (e *JSONLinesFormat) Flush() error { return nil }
+
+func (e *JSONArrayFormat) WriteRow(rows map[string]interface{}) error {
+	e.rows = append(e.rows, convertToJSON(rows))
+	return nil
+}
+
+func (e *JSONLinesFormat) WriteRow(rows map[string]interface{}) error {
 	rows = convertToJSON(rows)
 	err := e.encoder.Encode(rows)
 	return err

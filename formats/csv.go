@@ -20,6 +20,8 @@ func (e *CsvFormat) WriteHeader(columns []string) error {
 	return e.writer.Write(columns)
 }
 
+func (e *CsvFormat) Flush() error { return nil }
+
 func (e *CsvFormat) WriteRow(values map[string]interface{}) error {
 	record := []string{}
 	for _, value := range values {

@@ -21,6 +21,8 @@ func (e *XMLFormat) WriteHeader(columns []string) error {
 	return nil
 }
 
+func (e *XMLFormat) Flush() error { return nil }
+
 func (e *XMLFormat) WriteRow(values map[string]interface{}) error {
 	row := xml.StartElement{Name: xml.Name{"", "row"}}
 	tokens := []xml.Token{row}

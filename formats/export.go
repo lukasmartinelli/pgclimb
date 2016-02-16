@@ -11,6 +11,7 @@ import (
 type DataFormat interface {
 	WriteHeader(columns []string) error
 	WriteRow(map[string]interface{}) error
+	Flush() error
 }
 
 func Export(query string, connStr string, format DataFormat) error {
@@ -69,6 +70,10 @@ func Export(query string, connStr string, format DataFormat) error {
 				return err
 			}
 		}
+	}
+
+	if err = format.Flush(); err != nil {
+		return err
 	}
 
 	err = rows.Err()

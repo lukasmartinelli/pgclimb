@@ -97,7 +97,18 @@ func main() {
 				changeHelpTemplateArgs("<query>")
 				query := parseQuery(c, "jsonlines")
 				connStr := pg.ParseConnStr(c)
-				err := formats.Export(query, connStr, formats.NewJSONFormat())
+				err := formats.Export(query, connStr, formats.NewJSONArrayFormat())
+				exitOnError(err)
+			},
+		},
+		{
+			Name:  "json",
+			Usage: "Export JSON document",
+			Action: func(c *cli.Context) {
+				changeHelpTemplateArgs("<query>")
+				query := parseQuery(c, "json")
+				connStr := pg.ParseConnStr(c)
+				err := formats.Export(query, connStr, formats.NewJSONArrayFormat())
 				exitOnError(err)
 			},
 		},

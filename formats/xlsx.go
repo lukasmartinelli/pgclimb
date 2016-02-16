@@ -18,6 +18,8 @@ func NewXlsxFormat() *XlsxFormat {
 	return &XlsxFormat{file, sheet}
 }
 
+func (e *XlsxFormat) Flush() error { return nil }
+
 func (e *XlsxFormat) WriteHeader(columns []string) error {
 	row := e.sheet.AddRow()
 	for _, col := range columns {

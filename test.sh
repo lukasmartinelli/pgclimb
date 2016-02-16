@@ -65,11 +65,19 @@ function import_github_samples() {
     import_json "github_events" "$GITHUB_SAMPLE"
 }
 
-function test_json_export() {
+function test_json_lines_export() {
     local query="SELECT e.data->'repo'->>'name' as name, json_agg(c->>'sha') as commmits FROM github_events AS e, json_array_elements(e.data->'payload'->'commits') AS c WHERE e.data->>'type' = 'PushEvent' GROUP BY e.data->'repo'->>'name'"
     local filename="push_events.json"
     pgclimb --db $DB_NAME --user $DB_USER jsonlines "$query" > $filename
+    echo "Exported JSON lines to $filename"
+}
+
+function test_json_doc_export {
+    local query="SELECT e.data FROM github_events e WHERE e.data->>'type' = 'PushEvent'"
+    local filename="push_event_docs.json"
+    pgclimb --db $DB_NAME --user $DB_USER json "$query" > $filename
     echo "Exported JSON to $filename"
+
 }
 
 function test_csv_export() {
@@ -84,7 +92,8 @@ function main() {
     import_github_samples
     import_montgomery_county_samples
     test_csv_export
-    test_json_export
+    test_json_lines_export
+    test_json_doc_export
 }
 
 main
