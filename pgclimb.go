@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/codegangsta/cli"
-	"github.com/lukasmartinelli/pgclimb/export"
 	"github.com/lukasmartinelli/pgclimb/formats"
 	"github.com/lukasmartinelli/pgclimb/pg"
 )
@@ -98,7 +97,7 @@ func main() {
 				changeHelpTemplateArgs("<query>")
 				query := parseQuery(c, "jsonlines")
 				connStr := pg.ParseConnStr(c)
-				err := export.Export(query, connStr, formats.NewJsonEncoder())
+				err := formats.Export(query, connStr, formats.NewJsonEncoder())
 				exitOnError(err)
 			},
 		},
@@ -109,7 +108,7 @@ func main() {
 				changeHelpTemplateArgs("<query>")
 				query := parseQuery(c, "csv")
 				connStr := pg.ParseConnStr(c)
-				err := export.Export(query, connStr, formats.NewCsvEncoder())
+				err := formats.Export(query, connStr, formats.NewCsvEncoder())
 				exitOnError(err)
 			},
 		},
@@ -120,7 +119,7 @@ func main() {
 				changeHelpTemplateArgs("<query>")
 				query := parseQuery(c, "xml")
 				connStr := pg.ParseConnStr(c)
-				err := export.Export(query, connStr, formats.NewXmlEncoder())
+				err := formats.Export(query, connStr, formats.NewXmlEncoder())
 				exitOnError(err)
 			},
 		},
@@ -131,7 +130,7 @@ func main() {
 				changeHelpTemplateArgs("<query>")
 				query := parseQuery(c, "xlsx")
 				connStr := pg.ParseConnStr(c)
-				err := export.Export(query, connStr, formats.NewXlsxEncoder())
+				err := formats.Export(query, connStr, formats.NewXlsxEncoder())
 				exitOnError(err)
 			},
 		},
