@@ -21,6 +21,24 @@ func isSqlFile(arg string) bool {
 	return hasSqlExtension && !hasSelect
 }
 
+func isTplFile(arg string) bool {
+	return strings.HasSuffix(arg, ".tpl")
+}
+
+func parseTemplate(arg string) string {
+
+	if isTplFile(arg) {
+		filename := arg
+		rawTemplate, err := ioutil.ReadFile(filename)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		return string(rawTemplate)
+	} else {
+		return arg
+	}
+}
+
 func parseQuery(c *cli.Context, command string) string {
 	arg := c.Args().First()
 	if arg == "" {
@@ -90,6 +108,25 @@ func main() {
 	}
 
 	app.Commands = []cli.Command{
+		{
+			Name:  "template",
+			Usage: "Export data with custom template",
+			Action: func(c *cli.Context) {
+				changeHelpTemplateArgs("<query> <template>")
+
+				if len(c.Args()) != 2 {
+					cli.ShowCommandHelp(c, "template")
+					os.Exit(1)
+				}
+
+				query := parseQuery(c, "template")
+				rawTemplate := parseTemplate(c.Args()[1])
+
+				connStr := pg.ParseConnStr(c)
+				err := formats.Export(query, connStr, formats.NewTemplateFormat(rawTemplate))
+				exitOnError(err)
+			},
+		},
 		{
 			Name:  "jsonlines",
 			Usage: "Export newline-delimited JSON objects",
