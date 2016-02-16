@@ -6,17 +6,21 @@ import (
 	"os"
 )
 
-type CsvEncoder struct {
+type CsvFormat struct {
 	writer *csv.Writer
 }
 
-func NewCsvEncoder() *CsvEncoder {
+func NewCsvFormat() *CsvFormat {
 	writer := csv.NewWriter(os.Stdout)
 	writer.Comma = '\t'
-	return &CsvEncoder{writer}
+	return &CsvFormat{writer}
 }
 
-func (e *CsvEncoder) Encode(values map[string]interface{}) error {
+func (e *CsvFormat) WriteHeader(columns []string) error {
+	return e.writer.Write(columns)
+}
+
+func (e *CsvFormat) WriteRow(values map[string]interface{}) error {
 	record := []string{}
 	for _, value := range values {
 		var column string

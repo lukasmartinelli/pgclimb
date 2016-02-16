@@ -6,20 +6,28 @@ import (
 	"fmt"
 )
 
-type XlsxEncoder struct {
+type XlsxFormat struct {
 	file  *xlsx.File
 	sheet *xlsx.Sheet
 }
 
-func NewXlsxEncoder() *XlsxEncoder {
-
+func NewXlsxFormat() *XlsxFormat {
 	file := xlsx.NewFile()
 	sheet, _ := file.AddSheet("data")
 
-	return &XlsxEncoder{file, sheet}
+	return &XlsxFormat{file, sheet}
 }
 
-func (e *XlsxEncoder) Encode(values map[string]interface{}) error {
+func (e *XlsxFormat) WriteHeader(columns []string) error {
+	row := e.sheet.AddRow()
+	for _, col := range columns {
+		cell := row.AddCell()
+		cell.Value = col
+	}
+	return nil
+}
+
+func (e *XlsxFormat) WriteRow(values map[string]interface{}) error {
 	row := e.sheet.AddRow()
 
 	for _, value := range values {

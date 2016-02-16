@@ -97,7 +97,7 @@ func main() {
 				changeHelpTemplateArgs("<query>")
 				query := parseQuery(c, "jsonlines")
 				connStr := pg.ParseConnStr(c)
-				err := formats.Export(query, connStr, formats.NewJsonEncoder())
+				err := formats.Export(query, connStr, formats.NewJSONFormat())
 				exitOnError(err)
 			},
 		},
@@ -108,7 +108,7 @@ func main() {
 				changeHelpTemplateArgs("<query>")
 				query := parseQuery(c, "csv")
 				connStr := pg.ParseConnStr(c)
-				err := formats.Export(query, connStr, formats.NewCsvEncoder())
+				err := formats.Export(query, connStr, formats.NewCsvFormat())
 				exitOnError(err)
 			},
 		},
@@ -119,7 +119,7 @@ func main() {
 				changeHelpTemplateArgs("<query>")
 				query := parseQuery(c, "xml")
 				connStr := pg.ParseConnStr(c)
-				err := formats.Export(query, connStr, formats.NewXmlEncoder())
+				err := formats.Export(query, connStr, formats.NewXmlFormat())
 				exitOnError(err)
 			},
 		},
@@ -130,7 +130,7 @@ func main() {
 				changeHelpTemplateArgs("<query>")
 				query := parseQuery(c, "xlsx")
 				connStr := pg.ParseConnStr(c)
-				err := formats.Export(query, connStr, formats.NewXlsxEncoder())
+				err := formats.Export(query, connStr, formats.NewXlsxFormat())
 				exitOnError(err)
 			},
 		},

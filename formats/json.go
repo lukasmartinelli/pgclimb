@@ -5,15 +5,20 @@ import (
 	"os"
 )
 
-type JsonEncoder struct {
+type JSONFormat struct {
 	encoder *json.Encoder
 }
 
-func NewJsonEncoder() *JsonEncoder {
-	return &JsonEncoder{json.NewEncoder(os.Stdout)}
+func NewJSONFormat() *JSONFormat {
+	return &JSONFormat{json.NewEncoder(os.Stdout)}
 }
 
-func (e *JsonEncoder) Encode(rows map[string]interface{}) error {
+// Writing header for JSON is a NOP
+func (e *JSONFormat) WriteHeader(columns []string) error {
+	return nil
+}
+
+func (e *JSONFormat) WriteRow(rows map[string]interface{}) error {
 	rows = convertBytesToString(rows)
 	err := e.encoder.Encode(rows)
 	return err

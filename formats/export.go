@@ -1,20 +1,19 @@
 package formats
 
 import (
-	"fmt"
 	"log"
 	"os"
-	"time"
 
 	"github.com/lukasmartinelli/pgclimb/pg"
 )
 
-// Supports encoding a row in different formats
-type RowEncoder interface {
-	Encode(map[string]interface{}) error
+// Supports storing data in different formats
+type DataFormat interface {
+	WriteHeader(columns []string) error
+	WriteRow(map[string]interface{}) error
 }
 
-func Export(query string, connStr string, encoder RowEncoder) error {
+func Export(query string, connStr string, format DataFormat) error {
 	db, err := pg.Connect(connStr)
 	if err != nil {
 		return err
@@ -42,6 +41,8 @@ func Export(query string, connStr string, encoder RowEncoder) error {
 		return false
 	}()
 
+	format.WriteHeader(columnNames)
+
 	for rows.Next() {
 		values := make(map[string]interface{})
 		if err = rows.MapScan(values); err != nil {
@@ -58,13 +59,13 @@ func Export(query string, connStr string, encoder RowEncoder) error {
 			}
 			defer file.Close()
 
-			if err = encoder.Encode(values); err != nil {
+			if err = format.WriteRow(values); err != nil {
 				return err
 			}
 			file.Sync()
 			log.Printf("%s\n", filename)
 		} else {
-			if err = encoder.Encode(values); err != nil {
+			if err = format.WriteRow(values); err != nil {
 				return err
 			}
 		}
@@ -72,26 +73,4 @@ func Export(query string, connStr string, encoder RowEncoder) error {
 
 	err = rows.Err()
 	return err
-}
-
-func printValue(pval *interface{}) {
-	//fmt.Println(reflect.ValueOf(*pval).Kind())
-	switch v := (*pval).(type) {
-	case nil:
-		fmt.Print("NULL")
-	case int64:
-		fmt.Print(int64(v))
-	case bool:
-		if v {
-			fmt.Print("1")
-		} else {
-			fmt.Print("0")
-		}
-	case []byte:
-		fmt.Print(string(v))
-	case time.Time:
-		fmt.Print(v.Format("2006-01-02 15:04:05.999"))
-	default:
-		fmt.Print(v)
-	}
 }

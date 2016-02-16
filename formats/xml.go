@@ -6,17 +6,22 @@ import (
 	"os"
 )
 
-type XmlEncoder struct {
+type XmlFormat struct {
 	encoder *xml.Encoder
 }
 
-func NewXmlEncoder() *XmlEncoder {
+func NewXmlFormat() *XmlFormat {
 	e := xml.NewEncoder(os.Stdout)
 	e.Indent("  ", "    ")
-	return &XmlEncoder{e}
+	return &XmlFormat{e}
 }
 
-func (e *XmlEncoder) Encode(values map[string]interface{}) error {
+// Writing header for XML is a NOP
+func (e *XmlFormat) WriteHeader(columns []string) error {
+	return nil
+}
+
+func (e *XmlFormat) WriteRow(values map[string]interface{}) error {
 	row := xml.StartElement{Name: xml.Name{"", "row"}}
 	tokens := []xml.Token{row}
 	for key, value := range values {
