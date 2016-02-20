@@ -72,6 +72,13 @@ function test_json_lines_export() {
     echo "Exported JSON lines to $filename"
 }
 
+function test_xml() {
+    local query="SELECT * FROM employee_salaries"
+    local filename="salaries.xml"
+    pgclimb -d $DB_NAME -U $DB_USER -c "$query" -o "$filename" xml
+    echo "Exported XML to $filename"
+}
+
 function test_excel_export() {
     local query1="SELECT * FROM employee_salaries"
     local query2="SELECT full_name FROM employee_salaries"
@@ -128,6 +135,7 @@ function main() {
     test_json_doc_export
     test_templates
     test_excel_export
+    test_xml
 }
 
 main

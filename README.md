@@ -135,11 +135,10 @@ pgclimb \
 
 ### XML
 
-You can output XML to process it with other programs like [XLST](http://www.w3schools.com/xsl/).  If want more control over the XML output you can use the templating functionality
-of `pgclimb` or build your own XML document with [XML functions in PostgreSQL](https://wiki.postgresql.org/wiki/XML_Support).
+You can output XML to process it with other programs like [XLST](http://www.w3schools.com/xsl/). To have more control over the XML output you should use the `pgclimb` template functionality directly to generate XML or build your own XML document with [XML functions in PostgreSQL](https://wiki.postgresql.org/wiki/XML_Support).
 
 ```bash
-# Store XML tree of rows
+# Output XML for each row
 pgclimb -o salaries.xml -c "SELECT * FROM employee_salaries" xml
 ```
 
