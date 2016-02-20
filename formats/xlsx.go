@@ -1,45 +1,49 @@
 package formats
 
 import (
-	"fmt"
 	"io"
 
 	"github.com/tealeg/xlsx"
 )
 
 type XlsxFormat struct {
-	file  *xlsx.File
-	sheet *xlsx.Sheet
+	file    *xlsx.File
+	sheet   *xlsx.Sheet
+	writer  io.Writer
+	columns []string
 }
 
 func NewXlsxFormat(w io.Writer) *XlsxFormat {
 	file := xlsx.NewFile()
 	sheet, _ := file.AddSheet("data")
 
-	return &XlsxFormat{file, sheet}
+	return &XlsxFormat{file, sheet, w, make([]string, 0)}
 }
 
-func (e *XlsxFormat) Flush() error { return nil }
+func (f *XlsxFormat) Flush() error {
+	return f.file.Write(f.writer)
+}
 
-func (e *XlsxFormat) WriteHeader(columns []string) error {
-	row := e.sheet.AddRow()
+func (f *XlsxFormat) WriteHeader(columns []string) error {
+	f.columns = columns
+	row := f.sheet.AddRow()
 	for _, col := range columns {
 		cell := row.AddCell()
-		cell.Value = col
+		cell.SetString(col)
 	}
 	return nil
 }
 
-func (e *XlsxFormat) WriteRow(values map[string]interface{}) error {
-	row := e.sheet.AddRow()
+func (f *XlsxFormat) WriteRow(values map[string]interface{}) error {
+	row := f.sheet.AddRow()
 
-	for _, value := range values {
+	for _, col := range f.columns {
 		cell := row.AddCell()
-		switch value := (value).(type) {
+		switch value := (values[col]).(type) {
 		case []byte:
-			cell.Value = string(value)
+			cell.SetString(string(value))
 		case int64:
-			cell.Value = fmt.Sprintf("%d", value)
+			cell.SetInt64(value)
 		}
 	}
 	return nil

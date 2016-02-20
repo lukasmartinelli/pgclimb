@@ -7,39 +7,39 @@ import (
 )
 
 type CsvFormat struct {
-	writer *csv.Writer
+	writer  *csv.Writer
+	columns []string
 }
 
 func NewCsvFormat(w io.Writer, delimiter rune) *CsvFormat {
 	writer := csv.NewWriter(w)
 	writer.Comma = delimiter
-	return &CsvFormat{writer}
+	return &CsvFormat{writer, make([]string, 0)}
 }
 
-func (e *CsvFormat) WriteHeader(columns []string) error {
-	return e.writer.Write(columns)
+func (f *CsvFormat) WriteHeader(columns []string) error {
+	f.columns = columns
+	return f.writer.Write(columns)
 }
 
-func (e *CsvFormat) Flush() error { return nil }
+func (f *CsvFormat) Flush() error { return nil }
 
-func (e *CsvFormat) WriteRow(values map[string]interface{}) error {
+func (f *CsvFormat) WriteRow(values map[string]interface{}) error {
 	record := []string{}
-	for _, value := range values {
-		var column string
-		switch value := (value).(type) {
+	for _, col := range f.columns {
+		switch value := (values[col]).(type) {
 		case []byte:
-			column = string(value)
+			record = append(record, string(value))
 		case int64:
-			column = fmt.Sprintf("%d", value)
+			record = append(record, fmt.Sprintf("%d", value))
 		}
-		record = append(record, column)
 	}
-	err := e.writer.Write(record)
+	err := f.writer.Write(record)
 	if err != nil {
 		return err
 	}
 
-	e.writer.Flush()
-	err = e.writer.Error()
+	f.writer.Flush()
+	err = f.writer.Error()
 	return err
 }

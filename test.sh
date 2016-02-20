@@ -72,6 +72,14 @@ function test_json_lines_export() {
     echo "Exported JSON lines to $filename"
 }
 
+function test_excel_export() {
+    local query="SELECT * FROM employee_salaries"
+    local filename="montgomery_positions.xlsx"
+    pgclimb -d $DB_NAME -U $DB_USER -c "$query" -o "$filename" xlsx
+    echo "Exported Excel to $filename"
+}
+
+
 function test_json_doc_export {
     local query="SELECT e.data FROM github_events e WHERE e.data->>'type' = 'PushEvent'"
     local filename="push_event_docs.json"
@@ -94,6 +102,7 @@ function main() {
     test_csv_export
     test_json_lines_export
     test_json_doc_export
+    test_excel_export
 }
 
 main
