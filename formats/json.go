@@ -13,16 +13,8 @@ type JSONArrayFormat struct {
 	encoder *json.Encoder
 }
 
-type JSONLinesFormat struct {
-	encoder *json.Encoder
-}
-
 func NewJSONArrayFormat() *JSONArrayFormat {
 	return &JSONArrayFormat{make([]map[string]interface{}, 0), json.NewEncoder(os.Stdout)}
-}
-
-func NewJSONLinesFormat() *JSONLinesFormat {
-	return &JSONLinesFormat{json.NewEncoder(os.Stdout)}
 }
 
 // Writing header for JSON is a NOP
@@ -35,22 +27,9 @@ func (e *JSONArrayFormat) Flush() error {
 	return err
 }
 
-// Writing header for JSON is a NOP
-func (e *JSONLinesFormat) WriteHeader(columns []string) error {
-	return nil
-}
-
-func (e *JSONLinesFormat) Flush() error { return nil }
-
 func (e *JSONArrayFormat) WriteRow(rows map[string]interface{}) error {
 	e.rows = append(e.rows, convertToJSON(rows))
 	return nil
-}
-
-func (e *JSONLinesFormat) WriteRow(rows map[string]interface{}) error {
-	rows = convertToJSON(rows)
-	err := e.encoder.Encode(rows)
-	return err
 }
 
 func convertToJSON(rows map[string]interface{}) map[string]interface{} {
