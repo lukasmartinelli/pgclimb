@@ -124,8 +124,13 @@ and create graphs and filters. You can fill different datasets into different sp
 # Store all salaries in XLSX file
 pgclimb -o salaries.xlsx -c "SELECT * FROM employee_salaries" xlsx
 
-# Explicitly name sheet
-pgclimb -c "SELECT * FROM employee_salaries" xlsx --sheet "salaries"
+# Create XLSX file with multiple sheets
+pgclimb \
+    -c "SELECT DISTINCT position_title FROM employee_salaries" \
+    xlsx --sheet "positions"
+pgclimb \
+    -c "SELECT full_name FROM employee_salaries" \
+    xlsx --sheet "employees"
 ```
 
 ### XML

@@ -1,32 +1,50 @@
 package formats
 
 import (
-	"io"
+	"fmt"
+	"os"
 
 	"github.com/tealeg/xlsx"
 )
 
 type XlsxFormat struct {
-	file    *xlsx.File
-	sheet   *xlsx.Sheet
-	writer  io.Writer
-	columns []string
+	file     *xlsx.File
+	sheet    *xlsx.Sheet
+	fileName string
+	columns  []string
 }
 
-func NewXlsxFormat(w io.Writer, sheetName string) *XlsxFormat {
+func NewXlsxFormat(fileName string, sheetName string) (*XlsxFormat, error) {
 	file := xlsx.NewFile()
-	sheet, _ := file.AddSheet(sheetName)
+	if _, err := os.Stat(fileName); fileName != "" && err == nil {
+		file, err = xlsx.OpenFile(fileName)
+		if err != nil {
+			fmt.Println("Errord file")
+			return nil, err
+		}
+	}
+
+	sheet, err := file.AddSheet(sheetName)
+	if err != nil {
+		// Sheet already exists - empty it first
+		sheet = file.Sheet[sheetName]
+		sheet.Rows = make([]*xlsx.Row, 0)
+	}
 
 	return &XlsxFormat{
-		file:    file,
-		sheet:   sheet,
-		writer:  w,
-		columns: make([]string, 0),
-	}
+		file:     file,
+		fileName: fileName,
+		sheet:    sheet,
+		columns:  make([]string, 0),
+	}, nil
 }
 
 func (f *XlsxFormat) Flush() error {
-	return f.file.Write(f.writer)
+	if f.fileName == "" {
+		return f.file.Write(os.Stdout)
+	} else {
+		return f.file.Save(f.fileName)
+	}
 }
 
 func (f *XlsxFormat) WriteHeader(columns []string) error {

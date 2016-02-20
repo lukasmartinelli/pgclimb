@@ -236,7 +236,11 @@ func main() {
 				},
 			},
 			Action: func(c *cli.Context) {
-				format := formats.NewXlsxFormat(parseWriter(c), c.String("sheet"))
+				format, err := formats.NewXlsxFormat(
+					c.GlobalString("output"),
+					c.String("sheet"),
+				)
+				exitOnError(err)
 				exportFormat(c, format)
 			},
 		},

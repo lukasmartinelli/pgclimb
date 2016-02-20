@@ -73,10 +73,13 @@ function test_json_lines_export() {
 }
 
 function test_excel_export() {
-    local query="SELECT * FROM employee_salaries"
+    local query1="SELECT * FROM employee_salaries"
+    local query2="SELECT full_name FROM employee_salaries"
     local filename="montgomery_positions.xlsx"
-    pgclimb -d $DB_NAME -U $DB_USER -c "$query" -o "$filename" xlsx --sheet salaries
-    echo "Exported Excel to $filename"
+    pgclimb -d $DB_NAME -U $DB_USER -c "$query1" -o "$filename" xlsx --sheet salaries
+    echo "Exported salaries sheet to $filename"
+    pgclimb -d $DB_NAME -U $DB_USER -c "$query2" -o "$filename" xlsx --sheet employees
+    echo "Exported Excel employees sheet to $filename"
 }
 
 
