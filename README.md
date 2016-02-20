@@ -25,7 +25,7 @@ You can download a single binary for Linux, OSX or Windows.
 **OSX**
 
 ```bash
-wget -O pgclimb https://github.com/lukasmartinelli/pgfutter/releases/download/v0.1/pgfutter_darwin_amd64
+wget -O pgclimb https://github.com/lukasmartinelli/pgclimb/releases/download/v0.1/pgclimb_darwin_amd64
 chmod +x pgclimb
 
 ./pgclimb --help
@@ -34,7 +34,7 @@ chmod +x pgclimb
 **Linux**
 
 ```bash
-wget -O pgclimb https://github.com/lukasmartinelli/pgfutter/releases/download/v0.1/pgfutter_linux_amd64
+wget -O pgclimb https://github.com/lukasmartinelli/pgclimb/releases/download/v0.1/pgclimb_linux_amd64
 chmod +x pgclimb
 
 ./pgclimb --help
