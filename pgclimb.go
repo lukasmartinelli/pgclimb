@@ -76,7 +76,7 @@ func exitOnError(err error) {
 func main() {
 	app := cli.NewApp()
 	app.Name = "pgclimb"
-	app.Version = "0.1"
+	app.Version = "0.2"
 	app.Usage = "Export data from PostgreSQL into different data formats"
 
 	app.Flags = []cli.Flag{
