@@ -215,7 +215,7 @@ By specifying the `-o` option you can write the output to a file.
 pgclimb -o salaries.tsv -c "SELECT * FROM employee_salaries" tsv
 ```
 
-## Using JSON aggregation
+### Using JSON aggregation
 
 This is not a `pgclimb` feature but shows you how to create more complex
 JSON objects by using the [PostgreSQL JSON functions](http://www.postgresql.org/docs/9.5/static/functions-json.html).
@@ -223,18 +223,17 @@ JSON objects by using the [PostgreSQL JSON functions](http://www.postgresql.org/
 Let's query communities and join an additional birth rate table.
 
 ```bash
-pgclimb jsonlines "SELECT id, name, \\
+pgclimb -c "SELECT id, name, \\
     (SELECT array_to_json(array_agg(t)) FROM ( \\
             SELECT year, births FROM public.births \\
             WHERE community_id = c.id \\
             ORDER BY year ASC \\
         ) AS t \\
     ) AS births, \\
-    FROM communities) AS c"
+    FROM communities) AS c" jsonlines
 ```
 
 # Contribute
-
 
 ## Dependencies
 
