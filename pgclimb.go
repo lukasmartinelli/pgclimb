@@ -2,7 +2,7 @@ package main
 
 import (
 	"errors"
-	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"os"
@@ -14,14 +14,14 @@ import (
 	"github.com/lukasmartinelli/pgclimb/pg"
 )
 
-func changeHelpTemplateArgs(args string) {
-	cli.CommandHelpTemplate = strings.Replace(cli.CommandHelpTemplate, "[arguments...]", args, -1)
+type ExportParams struct {
+	connStr string
+	query   string
+	writer  io.Writer
 }
 
-func isSqlFile(arg string) bool {
-	hasSelect := strings.HasPrefix(strings.ToLower(arg), "select")
-	hasSqlExtension := strings.HasSuffix(arg, ".sql")
-	return hasSqlExtension && !hasSelect
+func changeHelpTemplateArgs(args string) {
+	cli.CommandHelpTemplate = strings.Replace(cli.CommandHelpTemplate, "[arguments...]", args, -1)
 }
 
 func isTplFile(arg string) bool {
@@ -29,7 +29,6 @@ func isTplFile(arg string) bool {
 }
 
 func parseTemplate(arg string) string {
-
 	if isTplFile(arg) {
 		filename := arg
 		rawTemplate, err := ioutil.ReadFile(filename)
@@ -42,19 +41,27 @@ func parseTemplate(arg string) string {
 	}
 }
 
-func exportFormat(c *cli.Context, format formats.DataFormat) error {
+func parseWriter(c *cli.Context) io.Writer {
+	outputFilename := c.GlobalString("output")
+
+	if outputFilename != "" {
+		f, err := os.Create(outputFilename)
+		exitOnError(err)
+		return f
+	}
+	return os.Stdout
+}
+
+func exportFormat(c *cli.Context, format formats.DataFormat) {
 	connStr := pg.ParseConnStr(c)
 	query, err := parseQuery(c)
-	if err != nil {
-		return err
-	}
-
-	return formats.Export(query, connStr, format)
+	exitOnError(err)
+	err = formats.Export(query, connStr, format)
+	exitOnError(err)
 }
 
 func parseQuery(c *cli.Context) (string, error) {
 	filename := c.GlobalString("file")
-	fmt.Println(filename)
 	if filename != "" {
 		query, err := ioutil.ReadFile(filename)
 		return string(query), err
@@ -151,58 +158,58 @@ func main() {
 					cli.ShowCommandHelp(c, "template")
 					os.Exit(1)
 				}
-				rawTemplate := parseTemplate(templateArg)
 
-				err := exportFormat(c, formats.NewTemplateFormat(rawTemplate))
-				exitOnError(err)
+				rawTemplate := parseTemplate(templateArg)
+				writer := parseWriter(c)
+				exportFormat(c, formats.NewTemplateFormat(writer, rawTemplate))
 			},
 		},
 		{
 			Name:  "jsonlines",
 			Usage: "Export newline-delimited JSON objects",
 			Action: func(c *cli.Context) {
-				err := exportFormat(c, formats.NewJSONLinesFormat())
-				exitOnError(err)
+				format := formats.NewJSONLinesFormat(parseWriter(c))
+				exportFormat(c, format)
 			},
 		},
 		{
 			Name:  "json",
 			Usage: "Export JSON document",
 			Action: func(c *cli.Context) {
-				err := exportFormat(c, formats.NewJSONArrayFormat())
-				exitOnError(err)
+				format := formats.NewJSONArrayFormat(parseWriter(c))
+				exportFormat(c, format)
 			},
 		},
 		{
 			Name:  "csv",
 			Usage: "Export CSV",
 			Action: func(c *cli.Context) {
-				err := exportFormat(c, formats.NewCsvFormat(';'))
-				exitOnError(err)
+				format := formats.NewCsvFormat(parseWriter(c), ';')
+				exportFormat(c, format)
 			},
 		},
 		{
 			Name:  "tsv",
 			Usage: "Export TSV",
 			Action: func(c *cli.Context) {
-				err := exportFormat(c, formats.NewCsvFormat('\t'))
-				exitOnError(err)
+				format := formats.NewCsvFormat(parseWriter(c), '\t')
+				exportFormat(c, format)
 			},
 		},
 		{
 			Name:  "xml",
 			Usage: "Export XML",
 			Action: func(c *cli.Context) {
-				err := exportFormat(c, formats.NewXMLFormat())
-				exitOnError(err)
+				format := formats.NewXMLFormat(parseWriter(c))
+				exportFormat(c, format)
 			},
 		},
 		{
 			Name:  "xlsx",
 			Usage: "Export XLSX spreadsheets",
 			Action: func(c *cli.Context) {
-				err := exportFormat(c, formats.NewXlsxFormat())
-				exitOnError(err)
+				format := formats.NewXlsxFormat(parseWriter(c))
+				exportFormat(c, format)
 			},
 		},
 	}

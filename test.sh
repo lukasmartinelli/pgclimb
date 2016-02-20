@@ -68,14 +68,14 @@ function import_github_samples() {
 function test_json_lines_export() {
     local query="SELECT e.data->'repo'->>'name' as name, json_agg(c->>'sha') as commmits FROM github_events AS e, json_array_elements(e.data->'payload'->'commits') AS c WHERE e.data->>'type' = 'PushEvent' GROUP BY e.data->'repo'->>'name'"
     local filename="push_events.json"
-    pgclimb -d $DB_NAME -U $DB_USER -c "$query" jsonlines > $filename
+    pgclimb -d $DB_NAME -U $DB_USER -c "$query" -o "$filename" jsonlines
     echo "Exported JSON lines to $filename"
 }
 
 function test_json_doc_export {
     local query="SELECT e.data FROM github_events e WHERE e.data->>'type' = 'PushEvent'"
     local filename="push_event_docs.json"
-    pgclimb --dbname $DB_NAME --username $DB_USER --command "$query" json > $filename
+    pgclimb --dbname $DB_NAME --username $DB_USER --command "$query" -o "$filename" json
     echo "Exported JSON to $filename"
 
 }
@@ -83,7 +83,7 @@ function test_json_doc_export {
 function test_csv_export() {
 local query="SELECT position_title, COUNT(*) AS employees, round(AVG(replace(current_annual_salary, '$', '')::numeric)) AS avg_salary FROM employee_salaries GROUP BY position_title ORDER BY 3 DESC"
     local filename="montgomery_average_salaries.csv"
-    echo "$query" | pgclimb -d $DB_NAME -U $DB_USER csv > $filename
+    echo "$query" | pgclimb -d $DB_NAME -U $DB_USER -o "$filename" csv
     echo "Exported CSV to $filename"
 }
 

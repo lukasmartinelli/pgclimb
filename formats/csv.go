@@ -3,15 +3,15 @@ package formats
 import (
 	"encoding/csv"
 	"fmt"
-	"os"
+	"io"
 )
 
 type CsvFormat struct {
 	writer *csv.Writer
 }
 
-func NewCsvFormat(delimiter rune) *CsvFormat {
-	writer := csv.NewWriter(os.Stdout)
+func NewCsvFormat(w io.Writer, delimiter rune) *CsvFormat {
+	writer := csv.NewWriter(w)
 	writer.Comma = delimiter
 	return &CsvFormat{writer}
 }

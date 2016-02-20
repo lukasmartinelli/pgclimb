@@ -3,15 +3,15 @@ package formats
 import (
 	"encoding/xml"
 	"fmt"
-	"os"
+	"io"
 )
 
 type XMLFormat struct {
 	encoder *xml.Encoder
 }
 
-func NewXMLFormat() *XMLFormat {
-	e := xml.NewEncoder(os.Stdout)
+func NewXMLFormat(w io.Writer) *XMLFormat {
+	e := xml.NewEncoder(w)
 	e.Indent("  ", "    ")
 	return &XMLFormat{e}
 }

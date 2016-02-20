@@ -1,9 +1,10 @@
 package formats
 
 import (
-	"github.com/tealeg/xlsx"
-
 	"fmt"
+	"io"
+
+	"github.com/tealeg/xlsx"
 )
 
 type XlsxFormat struct {
@@ -11,7 +12,7 @@ type XlsxFormat struct {
 	sheet *xlsx.Sheet
 }
 
-func NewXlsxFormat() *XlsxFormat {
+func NewXlsxFormat(w io.Writer) *XlsxFormat {
 	file := xlsx.NewFile()
 	sheet, _ := file.AddSheet("data")
 

@@ -2,7 +2,7 @@ package formats
 
 import (
 	"encoding/json"
-	"os"
+	"io"
 )
 
 type JSONArrayFormat struct {
@@ -13,8 +13,8 @@ type JSONArrayFormat struct {
 	encoder *json.Encoder
 }
 
-func NewJSONArrayFormat() *JSONArrayFormat {
-	return &JSONArrayFormat{make([]map[string]interface{}, 0), json.NewEncoder(os.Stdout)}
+func NewJSONArrayFormat(w io.Writer) *JSONArrayFormat {
+	return &JSONArrayFormat{make([]map[string]interface{}, 0), json.NewEncoder(w)}
 }
 
 // Writing header for JSON is a NOP

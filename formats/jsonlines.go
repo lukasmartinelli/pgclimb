@@ -2,15 +2,15 @@ package formats
 
 import (
 	"encoding/json"
-	"os"
+	"io"
 )
 
 type JSONLinesFormat struct {
 	encoder *json.Encoder
 }
 
-func NewJSONLinesFormat() *JSONLinesFormat {
-	return &JSONLinesFormat{json.NewEncoder(os.Stdout)}
+func NewJSONLinesFormat(w io.Writer) *JSONLinesFormat {
+	return &JSONLinesFormat{json.NewEncoder(w)}
 }
 
 // Writing header for JSON is a NOP
