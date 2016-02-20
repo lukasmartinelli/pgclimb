@@ -154,7 +154,7 @@ pgclimb template salaries.tpl query.sql
 ## Database Connection
 
 Database connection details can be provided via environment variables
-or as separate flags.
+or as separate flags (same flags as `psql`).
 
 name        | default     | description
 ------------|-------------|------------------------------
@@ -219,8 +219,20 @@ pgclimb jsonlines "SELECT id, name, \\
     FROM communities) AS c"
 ```
 
-# Contribute 
+# Contribute
 
+
+## Dependencies
+
+Go get the required dependencies for building `pgclimb`.
+
+```bash
+go get github.com/codegangsta/cli
+go get github.com/lib/pq
+go get github.com/jmoiron/sqlx
+go get github.com/tealeg/xlsx
+go get github.com/andrew-d/go-termutil
+```
 
 ## Cross-compiling
 
@@ -233,5 +245,4 @@ docker run --rm -v "$(pwd)":/usr/src/pgclimb -w /usr/src/pgclimb tcnksm/gox:1.4.
 
 ## Integration Tests
 
-Run `test.sh` to run integration tests of the program with a PostgreSQL server. Take a look at the
-`.travis.yml`.
+Run `test.sh` to run integration tests of the program with a PostgreSQL server. Take a look at the `.travis.yml`.

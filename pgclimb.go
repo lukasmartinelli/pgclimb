@@ -1,11 +1,13 @@
 package main
 
 import (
+	"errors"
 	"io/ioutil"
 	"log"
 	"os"
 	"strings"
 
+	"github.com/andrew-d/go-termutil"
 	"github.com/codegangsta/cli"
 	"github.com/lukasmartinelli/pgclimb/formats"
 	"github.com/lukasmartinelli/pgclimb/pg"
@@ -39,23 +41,34 @@ func parseTemplate(arg string) string {
 	}
 }
 
-func parseQuery(c *cli.Context, command string) string {
-	arg := c.Args().First()
-	if arg == "" {
-		cli.ShowCommandHelp(c, command)
-		os.Exit(1)
+func exportFormat(c *cli.Context, format formats.DataFormat) error {
+	connStr := pg.ParseConnStr(c)
+	query, err := parseQuery(c)
+	if err != nil {
+		return err
 	}
 
-	if isSqlFile(arg) {
-		filename := arg
+	return formats.Export(query, connStr, format)
+}
+
+func parseQuery(c *cli.Context) (string, error) {
+	filename := c.String("file")
+	if filename != "" {
 		query, err := ioutil.ReadFile(filename)
-		if err != nil {
-			log.Fatalln(err)
-		}
-		return string(query)
-	} else {
-		return arg
+		return string(query), err
 	}
+
+	command := c.String("command")
+	if command != "" {
+		return command, nil
+	}
+
+	if !termutil.Isatty(os.Stdin.Fd()) {
+		query, err := ioutil.ReadAll(os.Stdin)
+		return string(query), err
+	}
+
+	return "", errors.New("You need to specify a SQL query.")
 }
 
 func exitOnError(err error) {
@@ -72,7 +85,7 @@ func main() {
 	app.Usage = "Export data from PostgreSQL into different data formats"
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
-			Name:   "dbname, db",
+			Name:   "dbname, d",
 			Value:  "postgres",
 			Usage:  "database",
 			EnvVar: "DB_NAME",
@@ -84,13 +97,13 @@ func main() {
 			EnvVar: "DB_HOST",
 		},
 		cli.StringFlag{
-			Name:   "port",
+			Name:   "port, p",
 			Value:  "5432",
 			Usage:  "port",
 			EnvVar: "DB_PORT",
 		},
 		cli.StringFlag{
-			Name:   "username, user",
+			Name:   "username, U",
 			Value:  "postgres",
 			Usage:  "username",
 			EnvVar: "DB_USER",
@@ -100,10 +113,26 @@ func main() {
 			Usage: "require ssl mode",
 		},
 		cli.StringFlag{
-			Name:   "pass, pw",
+			Name:   "password, pass",
 			Value:  "",
 			Usage:  "password",
 			EnvVar: "DB_PASS",
+		},
+		cli.StringFlag{
+			Name:   "query, command, c",
+			Value:  "",
+			Usage:  "SQL query to execute",
+			EnvVar: "DB_QUERY",
+		},
+		cli.StringFlag{
+			Name:  "file, f",
+			Value: "",
+			Usage: "SQL query filename",
+		},
+		cli.StringFlag{
+			Name:  "output, o",
+			Value: "",
+			Usage: "Output filename",
 		},
 	}
 
@@ -112,18 +141,16 @@ func main() {
 			Name:  "template",
 			Usage: "Export data with custom template",
 			Action: func(c *cli.Context) {
-				changeHelpTemplateArgs("<query> <template>")
+				changeHelpTemplateArgs("<template>")
 
-				if len(c.Args()) != 2 {
+				templateArg := c.Args().First()
+				if templateArg == "" {
 					cli.ShowCommandHelp(c, "template")
 					os.Exit(1)
 				}
+				rawTemplate := parseTemplate(templateArg)
 
-				query := parseQuery(c, "template")
-				rawTemplate := parseTemplate(c.Args()[1])
-
-				connStr := pg.ParseConnStr(c)
-				err := formats.Export(query, connStr, formats.NewTemplateFormat(rawTemplate))
+				err := exportFormat(c, formats.NewTemplateFormat(rawTemplate))
 				exitOnError(err)
 			},
 		},
@@ -131,10 +158,7 @@ func main() {
 			Name:  "jsonlines",
 			Usage: "Export newline-delimited JSON objects",
 			Action: func(c *cli.Context) {
-				changeHelpTemplateArgs("<query>")
-				query := parseQuery(c, "jsonlines")
-				connStr := pg.ParseConnStr(c)
-				err := formats.Export(query, connStr, formats.NewJSONArrayFormat())
+				err := exportFormat(c, formats.NewJSONLinesFormat())
 				exitOnError(err)
 			},
 		},
@@ -142,10 +166,7 @@ func main() {
 			Name:  "json",
 			Usage: "Export JSON document",
 			Action: func(c *cli.Context) {
-				changeHelpTemplateArgs("<query>")
-				query := parseQuery(c, "json")
-				connStr := pg.ParseConnStr(c)
-				err := formats.Export(query, connStr, formats.NewJSONArrayFormat())
+				err := exportFormat(c, formats.NewJSONArrayFormat())
 				exitOnError(err)
 			},
 		},
@@ -153,10 +174,7 @@ func main() {
 			Name:  "csv",
 			Usage: "Export CSV",
 			Action: func(c *cli.Context) {
-				changeHelpTemplateArgs("<query>")
-				query := parseQuery(c, "csv")
-				connStr := pg.ParseConnStr(c)
-				err := formats.Export(query, connStr, formats.NewCsvFormat(';'))
+				err := exportFormat(c, formats.NewCsvFormat(';'))
 				exitOnError(err)
 			},
 		},
@@ -164,10 +182,7 @@ func main() {
 			Name:  "tsv",
 			Usage: "Export TSV",
 			Action: func(c *cli.Context) {
-				changeHelpTemplateArgs("<query>")
-				query := parseQuery(c, "tsv")
-				connStr := pg.ParseConnStr(c)
-				err := formats.Export(query, connStr, formats.NewCsvFormat('\t'))
+				err := exportFormat(c, formats.NewCsvFormat('\t'))
 				exitOnError(err)
 			},
 		},
@@ -175,10 +190,7 @@ func main() {
 			Name:  "xml",
 			Usage: "Export XML",
 			Action: func(c *cli.Context) {
-				changeHelpTemplateArgs("<query>")
-				query := parseQuery(c, "xml")
-				connStr := pg.ParseConnStr(c)
-				err := formats.Export(query, connStr, formats.NewXMLFormat())
+				err := exportFormat(c, formats.NewXMLFormat())
 				exitOnError(err)
 			},
 		},
@@ -186,10 +198,7 @@ func main() {
 			Name:  "xlsx",
 			Usage: "Export XLSX spreadsheets",
 			Action: func(c *cli.Context) {
-				changeHelpTemplateArgs("<query>")
-				query := parseQuery(c, "xlsx")
-				connStr := pg.ParseConnStr(c)
-				err := formats.Export(query, connStr, formats.NewXlsxFormat())
+				err := exportFormat(c, formats.NewXlsxFormat())
 				exitOnError(err)
 			},
 		},
