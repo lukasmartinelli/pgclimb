@@ -75,7 +75,7 @@ function test_json_lines_export() {
 function test_excel_export() {
     local query="SELECT * FROM employee_salaries"
     local filename="montgomery_positions.xlsx"
-    pgclimb -d $DB_NAME -U $DB_USER -c "$query" -o "$filename" xlsx
+    pgclimb -d $DB_NAME -U $DB_USER -c "$query" -o "$filename" xlsx --sheet salaries
     echo "Exported Excel to $filename"
 }
 

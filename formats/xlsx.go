@@ -13,11 +13,16 @@ type XlsxFormat struct {
 	columns []string
 }
 
-func NewXlsxFormat(w io.Writer) *XlsxFormat {
+func NewXlsxFormat(w io.Writer, sheetName string) *XlsxFormat {
 	file := xlsx.NewFile()
-	sheet, _ := file.AddSheet("data")
+	sheet, _ := file.AddSheet(sheetName)
 
-	return &XlsxFormat{file, sheet, w, make([]string, 0)}
+	return &XlsxFormat{
+		file:    file,
+		sheet:   sheet,
+		writer:  w,
+		columns: make([]string, 0),
+	}
 }
 
 func (f *XlsxFormat) Flush() error {

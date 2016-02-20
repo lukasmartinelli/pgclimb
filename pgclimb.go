@@ -228,8 +228,15 @@ func main() {
 		{
 			Name:  "xlsx",
 			Usage: "Export XLSX spreadsheets",
+			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name:  "sheet",
+					Value: "data",
+					Usage: "spreadsheet name",
+				},
+			},
 			Action: func(c *cli.Context) {
-				format := formats.NewXlsxFormat(parseWriter(c))
+				format := formats.NewXlsxFormat(parseWriter(c), c.String("sheet"))
 				exportFormat(c, format)
 			},
 		},
