@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -52,13 +53,14 @@ func exportFormat(c *cli.Context, format formats.DataFormat) error {
 }
 
 func parseQuery(c *cli.Context) (string, error) {
-	filename := c.String("file")
+	filename := c.GlobalString("file")
+	fmt.Println(filename)
 	if filename != "" {
 		query, err := ioutil.ReadFile(filename)
 		return string(query), err
 	}
 
-	command := c.String("command")
+	command := c.GlobalString("command")
 	if command != "" {
 		return command, nil
 	}
@@ -83,6 +85,7 @@ func main() {
 	app.Name = "pgclimb"
 	app.Version = "0.1"
 	app.Usage = "Export data from PostgreSQL into different data formats"
+
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
 			Name:   "dbname, d",
