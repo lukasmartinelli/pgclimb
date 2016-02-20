@@ -1,11 +1,6 @@
 package formats
 
-import (
-	"log"
-	"os"
-
-	"github.com/lukasmartinelli/pgclimb/pg"
-)
+import "github.com/lukasmartinelli/pgclimb/pg"
 
 // Supports storing data in different formats
 type DataFormat interface {
@@ -33,42 +28,18 @@ func Export(query string, connStr string, format DataFormat) error {
 		return err
 	}
 
-	supportsFilename := func() bool {
-		for _, colName := range columnNames {
-			if colName == "filename" {
-				return true
-			}
-		}
-		return false
-	}()
-
-	format.WriteHeader(columnNames)
+	if err = format.WriteHeader(columnNames); err != nil {
+		return err
+	}
 
 	for rows.Next() {
 		values := make(map[string]interface{})
 		if err = rows.MapScan(values); err != nil {
-			return nil
+			return err
 		}
 
-		if supportsFilename {
-			filename := values["filename"].(string)
-			delete(values, "filename")
-
-			file, err := os.Create(filename)
-			if err != nil {
-				return err
-			}
-			defer file.Close()
-
-			if err = format.WriteRow(values); err != nil {
-				return err
-			}
-			file.Sync()
-			log.Printf("%s\n", filename)
-		} else {
-			if err = format.WriteRow(values); err != nil {
-				return err
-			}
+		if err = format.WriteRow(values); err != nil {
+			return err
 		}
 	}
 
@@ -76,6 +47,5 @@ func Export(query string, connStr string, format DataFormat) error {
 		return err
 	}
 
-	err = rows.Err()
-	return err
+	return rows.Err()
 }
