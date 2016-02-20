@@ -3,18 +3,19 @@
 <img align="right" alt="Climbing elephant" src="logo.png" />
 
 A PostgreSQL utility to export data into different data formats with
-support for templates and an easier workflow than simply using `psql`.
+support for templates.
 
 Features:
 - Export data to [JSON](#json-document), [JSON Lines](#json-lines), [CSV](#csv-and-tsv), [XLSX](#xlsx), [XML](#xml)
-- Use [Templates](#templates) for any custom format (HTML, Markdown, Text)
+- Use [Templates](#templates) to support custom formats (HTML, Markdown, Text)
 
 Use Cases:
 - `psql` alternative for getting data out of PostgreSQL
 - Publish data sets
-- Transform data for graphing it with spreadsheet software or JavaScript libraries
+- Create Excel reports from the database
+- Generate HTML repors
+- Transform data to JSON for graphing it JavaScript libraries
 - Generate readonly JSON APIs
-- Generate a web page
 
 ## Install
 
@@ -52,71 +53,100 @@ yourself](https://github.com/lukasmartinelli/pgclimb/releases/latest).
 The example queries operate on the open data [employee salaries of Montgomery County Maryland](https://data.montgomerycountymd.gov/Human-Resources/Employee-Salaries-2014/54rh-89p8).
 To connect to your beloved PostgreSQL database set the [appropriate connection options](#database-connection).
 
-## CSV and TSV
+### CSV and TSV
 
-Exporting CSV and TSV files is very similar to using `psql` and the `COPY TO` statement. You can customize the delimiter which is `,` by default.
+Exporting CSV and TSV files is very similar to using `psql` and the `COPY TO` statement.
+
+You can customize the delimiter which is `,` by default.
 
 ```bash
-# Create a standard CSV file
-pgclimb -c "SELECT * FROM employee_salaries" csv
-# Create CSV file with custom delimiter and header row
-pgclimb -c "SELECT full_name, position_title FROM employee_salaries" csv --delimiter ";" --header
-# Create TSV files
-pgclimb -c "SELECT position_title, COUNT(*) FROM employee_salaries GROUP BY position_title" tsv
+# Write CSV file to stdout with "," as delimiter
+pgclimb -c "SELECT * FROM employee_salaries"
+
+# Save CSV file with custom delimiter and header row to file
+pgclimb \
+    -o salaries.csv \
+    -c "SELECT full_name, position_title FROM employee_salaries" \
+    csv --delimiter ";" --header
+
+# Create TSV file with SQL query from stdin
+pgclimb -o positions.tsv tsv <<EOF
+SELECT position_title, COUNT(*) FROM employee_salaries
+GROUP BY position_title
+ORDER BY 1
+EOF
 ```
 
 ### JSON Document
 
-Creating a single JSON document of a query is especially helpful if you
+Creating a single JSON document of a query is helpful if you
 interface with other programs like providing data for JavaScript or creating
 a readonly JSON API. You don't need to `json_agg` your objects, `pgclimb` will
-automatically serialize the JSON for you - it does however supported nested JSON objects for more complicated queries.
+automatically serialize the JSON for you - it also supports nested JSON objects for more complicated queries.
 
 ```bash
 # Query all salaries into JSON array
 pgclimb -c "SELECT * FROM employee_salaries" json
-# Render all employees of a position as nested JSON object
-pgclimb -c "SELECT s.position_title, json_agg(s) FROM employee_salaries s GROUP BY s.position_title" json
+
+# Query all employees of a position as nested JSON object
+cat << EOF > employees_by_position.sql
+SELECT s.position_title, json_agg(s) AS employees
+FROM employee_salaries s
+GROUP BY s.position_title
+ORDER BY 1
+EOF
+
+# Load query from file and store it as JSON array in file
+pgclimb \
+    -f employees_by_position.sql \
+    -o employees_by_position.json \
+    json
 ```
 
 ### JSON Lines
 
 [Newline delimited JSON](http://jsonlines.org/) is a good format to exchange
 structured data in large quantities which does not fit well into the CSV format.
+Instead of storing the entire JSON array each line is a valid JSON object.
 
 ```bash
-# Query all salaries into JSON array
+# Query all salaries as separate JSON objects
 pgclimb -c "SELECT * FROM employee_salaries" jsonlines
-# Render all employees of a position as nested JSON object
-pgclimb -c "SELECT s.position_title, json_agg(s) FROM employee_salaries s GROUP BY s.position_title" jsonlines
+
+# With the query from above but this time stored as json lines
+# In this example we interface with jq to pluck the first employee of each position
+pgclimb -f employees_by_position.sql json | jq '.employees[0].full_name'
 ```
 
 ### XLSX
 
-Excel files are useful for non programmers to directly work with the data
-and create graphs and filters. You can also fill different data into different spreedsheets.
+Excel files are really useful to exchange data with non programmers
+and create graphs and filters. You can fill different datasets into different spreedsheets and distribute one single Excel file.
 
 ```bash
 # Store all salaries in XLSX file
-pgclimb -c "SELECT * FROM employee_salaries" xlsx
+pgclimb -o salaries.xlsx -c "SELECT * FROM employee_salaries" xlsx
+
 # Explicitly name sheet name
 pgclimb -c "SELECT * FROM employee_salaries" xlsx --sheet "salaries"
 ```
 
 ### XML
 
-You can output XML to process it with other programs or a XLST stylesheet.
+You can output XML to process it with other programs like [XLST](http://www.w3schools.com/xsl/).
 If want more control over the XML output you can use the templating functionality
 of `pgclimb` or build your own XML document with [XML functions in PostgreSQL](https://wiki.postgresql.org/wiki/XML_Support).
 
 ```bash
-pgclimb -c "SELECT * FROM employee_salaries" xml
+# Store XML tree of rows
+pgclimb -o salaries.xml -c "SELECT * FROM employee_salaries" xml
 ```
 
 ## Templates
 
-This is the most advanced option and allows you to implement a lot of other formats and endpoints for free.
-Because the template and query in this example are larger we fall back to using files instead of passing arguments.
+Templates are the most powerful feature of `pgclimb` and allow you to implement
+other formats that are not built in. In this example we will create a
+HTML report of the salaries.
 
 Create a template `salaries.tpl`.
 
@@ -144,7 +174,7 @@ SELECT * FROM employee_salaries
 And now run the template.
 
 ```
-pgclimb -f query.sql template salaries.tpl
+pgclimb -f query.sql -o salaries.html template salaries.tpl
 ```
 
 ## Database Connection
@@ -163,17 +193,26 @@ name        | default     | description
 
 ## Advanced Use Cases
 
-### Load SQL from File
+### Different ways of Querying
 
-If you have a long SQL statement to select your data you can read
-the query from a file. Instead of passing a query to `pgclimb` you 
-pass a filename ending with `.sql`.
+Like `psql` you can specify a query at different places.
 
 ```bash
-# Store query in file
-echo 'SELECT * FROM communities' > myquery.sql
-# Execute query from file
-pgclimb jsonlines myquery.sql
+# Read query from stdin
+echo "SELECT * FROM employee_salaries" | pgclimb
+# Specify simple queries directly as arguments
+pgclimb -c "SELECT * FROM employee_salaries"
+# Load query from file
+pgclimb -f query.sql
+```
+
+### Control Output
+
+`pgclimb` will write the result to `stdout` by default.
+By specifying the `-o` option you can write the output to a file.
+
+```bash
+pgclimb -o salaries.tsv -c "SELECT * FROM employee_salaries" tsv
 ```
 
 ## Using JSON aggregation
