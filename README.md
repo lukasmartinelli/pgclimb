@@ -9,8 +9,7 @@ support for templates and an easier workflow than simply using `psql`.
 
 Features:
 - Export data to [JSON](#json-document), [JSON Lines](#json-lines), [CSV](#csv-and-tsv), [XLSX](#xlsx), [XML](#xml)
-- [Templates](#templates) are supported for anything else (HTML, Markdown, Text)
-- Advanced directory structures for generating e.g. readonly JSON APIs or multiple CSV files
+- Use [Templates](#templates) for any custom format (HTML, Markdown, Text)
 
 Use Cases:
 - `psql` alternative for getting data out of PostgreSQL
@@ -26,7 +25,7 @@ You can download a single binary for Linux, OSX or Windows.
 **OSX**
 
 ```bash
-wget -O pgclimb https://github.com/lukasmartinelli/pgfutter/releases/download/v0.3.2/pgfutter_darwin_amd64
+wget -O pgclimb https://github.com/lukasmartinelli/pgfutter/releases/download/v0.1/pgfutter_darwin_amd64
 chmod +x pgclimb
 
 ./pgclimb --help
@@ -35,7 +34,7 @@ chmod +x pgclimb
 **Linux**
 
 ```bash
-wget -O pgclimb https://github.com/lukasmartinelli/pgfutter/releases/download/v0.3.2/pgfutter_linux_amd64
+wget -O pgclimb https://github.com/lukasmartinelli/pgfutter/releases/download/v0.1/pgfutter_linux_amd64
 chmod +x pgclimb
 
 ./pgclimb --help
@@ -61,12 +60,11 @@ Exporting CSV and TSV files is very similar to using `psql` and the `COPY TO` st
 
 ```bash
 # Create a standard CSV file
-pgclimb csv "SELECT * FROM employee_salaries"
+pgclimb -c "SELECT * FROM employee_salaries" csv
 # Create CSV file with custom delimiter and header row
-pgclimb csv "SELECT full_name, position_title FROM employee_salaries" \
-     --delimiter ";" --header
+pgclimb -c "SELECT full_name, position_title FROM employee_salaries" csv --delimiter ";" --header
 # Create TSV files
-pgclimb tsv "SELECT position_title, COUNT(*) FROM employee_salaries GROUP BY position_title"
+pgclimb -c "SELECT position_title, COUNT(*) FROM employee_salaries GROUP BY position_title" tsv
 ```
 
 ### JSON Document
@@ -78,9 +76,9 @@ automatically serialize the JSON for you - it does however supported nested JSON
 
 ```bash
 # Query all salaries into JSON array
-pgclimb json "SELECT * FROM employee_salaries"
+pgclimb -c "SELECT * FROM employee_salaries" json
 # Render all employees of a position as nested JSON object
-pgclimb json "SELECT s.position_title, json_agg(s) FROM employee_salaries s GROUP BY s.position_title"
+pgclimb -c "SELECT s.position_title, json_agg(s) FROM employee_salaries s GROUP BY s.position_title" json
 ```
 
 ### JSON Lines
@@ -90,9 +88,9 @@ structured data in large quantities which does not fit well into the CSV format.
 
 ```bash
 # Query all salaries into JSON array
-pgclimb jsonlines "SELECT * FROM employee_salaries"
+pgclimb -c "SELECT * FROM employee_salaries" jsonlines
 # Render all employees of a position as nested JSON object
-pgclimb jsonlines "SELECT s.position_title, json_agg(s) FROM employee_salaries s GROUP BY s.position_title"
+pgclimb -c "SELECT s.position_title, json_agg(s) FROM employee_salaries s GROUP BY s.position_title" jsonlines
 ```
 
 ### XLSX
@@ -102,9 +100,9 @@ and create graphs and filters. You can also fill different data into different s
 
 ```bash
 # Store all salaries in XLSX file
-pgclimb xlsx "SELECT * FROM employee_salaries"
+pgclimb -c "SELECT * FROM employee_salaries" xlsx
 # Explicitly name sheet name
-pgclimb xlsx "SELECT * FROM employee_salaries" --sheet "salaries"
+pgclimb -c "SELECT * FROM employee_salaries" xlsx --sheet "salaries"
 ```
 
 ### XML
@@ -114,7 +112,7 @@ If want more control over the XML output you can use the templating functionalit
 of `pgclimb` or build your own XML document with [XML functions in PostgreSQL](https://wiki.postgresql.org/wiki/XML_Support).
 
 ```bash
-pgclimb xml "SELECT * FROM employee_salaries"
+pgclimb -c "SELECT * FROM employee_salaries" xml
 ```
 
 ## Templates
@@ -148,7 +146,7 @@ SELECT * FROM employee_salaries
 And now run the template.
 
 ```
-pgclimb template salaries.tpl query.sql
+pgclimb -f query.sql template salaries.tpl
 ```
 
 ## Database Connection
@@ -178,27 +176,6 @@ pass a filename ending with `.sql`.
 echo 'SELECT * FROM communities' > myquery.sql
 # Execute query from file
 pgclimb jsonlines myquery.sql
-```
-
-## Control filename via column data
-
-Let's generate a `communities.json` files containing an overview of all
-files and a file for each community containing the details.
-
-Generate a single document.
-
-```bash
-pgclimb json "SELECT 'communities.json' AS filename, \\
-          json_agg(t) AS document \\
-          FROM (SELECT bfs_id, name FROM communities) AS t" --fname-field 'filename'
-```
-
-Generate multiple documents with the details.
-
-```bash
-pgclimb json "SELECT 'communities/' || bfs_id || '.json' AS filename, \
-                 json_agg(c) AS document \
-          FROM communities) AS c" --fname-field 'filename'
 ```
 
 ## Using JSON aggregation
