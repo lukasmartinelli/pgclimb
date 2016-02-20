@@ -7,18 +7,13 @@ import (
 	"log"
 	"os"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/andrew-d/go-termutil"
 	"github.com/codegangsta/cli"
 	"github.com/lukasmartinelli/pgclimb/formats"
 	"github.com/lukasmartinelli/pgclimb/pg"
 )
-
-type ExportParams struct {
-	connStr string
-	query   string
-	writer  io.Writer
-}
 
 func changeHelpTemplateArgs(args string) {
 	cli.CommandHelpTemplate = strings.Replace(cli.CommandHelpTemplate, "[arguments...]", args, -1)
@@ -183,16 +178,42 @@ func main() {
 		{
 			Name:  "csv",
 			Usage: "Export CSV",
+			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name:  "delimiter",
+					Value: ",",
+					Usage: "column delimiter",
+				},
+				cli.BoolFlag{
+					Name:  "header",
+					Usage: "output header row",
+				},
+			},
 			Action: func(c *cli.Context) {
-				format := formats.NewCsvFormat(parseWriter(c), ';')
+				delimiter, _ := utf8.DecodeRuneInString(c.String("delimiter"))
+				format := formats.NewCsvFormat(
+					parseWriter(c),
+					delimiter,
+					c.Bool("header"),
+				)
 				exportFormat(c, format)
 			},
 		},
 		{
 			Name:  "tsv",
 			Usage: "Export TSV",
+			Flags: []cli.Flag{
+				cli.BoolFlag{
+					Name:  "header",
+					Usage: "output header row",
+				},
+			},
 			Action: func(c *cli.Context) {
-				format := formats.NewCsvFormat(parseWriter(c), '\t')
+				format := formats.NewCsvFormat(
+					parseWriter(c),
+					'\t',
+					c.Bool("header"),
+				)
 				exportFormat(c, format)
 			},
 		},

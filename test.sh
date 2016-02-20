@@ -91,7 +91,7 @@ function test_json_doc_export {
 function test_csv_export() {
 local query="SELECT position_title, COUNT(*) AS employees, round(AVG(replace(current_annual_salary, '$', '')::numeric)) AS avg_salary FROM employee_salaries GROUP BY position_title ORDER BY 3 DESC"
     local filename="montgomery_average_salaries.csv"
-    echo "$query" | pgclimb -d $DB_NAME -U $DB_USER -o "$filename" csv
+    echo "$query" | pgclimb -d $DB_NAME -U $DB_USER -o "$filename" csv --delimiter ";" --header
     echo "Exported CSV to $filename"
 }
 

@@ -57,14 +57,12 @@ To connect to your beloved PostgreSQL database set the [appropriate connection o
 
 Exporting CSV and TSV files is very similar to using `psql` and the `COPY TO` statement.
 
-You can customize the delimiter which is `,` by default.
-
 ```bash
-# Write CSV file to stdout with "," as delimiter
-pgclimb -c "SELECT * FROM employee_salaries"
+# Write CSV file to stdout with comma as default delimiter
+pgclimb -c "SELECT * FROM employee_salaries" csv
 
 # Save CSV file with custom delimiter and header row to file
-pgclimb \
+pgclimb
     -o salaries.csv \
     -c "SELECT full_name, position_title FROM employee_salaries" \
     csv --delimiter ";" --header
@@ -113,7 +111,6 @@ Instead of storing the entire JSON array each line is a valid JSON object.
 # Query all salaries as separate JSON objects
 pgclimb -c "SELECT * FROM employee_salaries" jsonlines
 
-# With the query from above but this time stored as json lines
 # In this example we interface with jq to pluck the first employee of each position
 pgclimb -f employees_by_position.sql json | jq '.employees[0].full_name'
 ```
@@ -127,14 +124,13 @@ and create graphs and filters. You can fill different datasets into different sp
 # Store all salaries in XLSX file
 pgclimb -o salaries.xlsx -c "SELECT * FROM employee_salaries" xlsx
 
-# Explicitly name sheet name
+# Explicitly name sheet
 pgclimb -c "SELECT * FROM employee_salaries" xlsx --sheet "salaries"
 ```
 
 ### XML
 
-You can output XML to process it with other programs like [XLST](http://www.w3schools.com/xsl/).
-If want more control over the XML output you can use the templating functionality
+You can output XML to process it with other programs like [XLST](http://www.w3schools.com/xsl/).  If want more control over the XML output you can use the templating functionality
 of `pgclimb` or build your own XML document with [XML functions in PostgreSQL](https://wiki.postgresql.org/wiki/XML_Support).
 
 ```bash

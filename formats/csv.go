@@ -7,19 +7,28 @@ import (
 )
 
 type CsvFormat struct {
-	writer  *csv.Writer
-	columns []string
+	writer    *csv.Writer
+	columns   []string
+	headerRow bool
 }
 
-func NewCsvFormat(w io.Writer, delimiter rune) *CsvFormat {
+func NewCsvFormat(w io.Writer, delimiter rune, headerRow bool) *CsvFormat {
 	writer := csv.NewWriter(w)
 	writer.Comma = delimiter
-	return &CsvFormat{writer, make([]string, 0)}
+	return &CsvFormat{
+		writer:    writer,
+		columns:   make([]string, 0),
+		headerRow: headerRow,
+	}
 }
 
 func (f *CsvFormat) WriteHeader(columns []string) error {
 	f.columns = columns
-	return f.writer.Write(columns)
+	if f.headerRow {
+		return f.writer.Write(columns)
+	} else {
+		return nil
+	}
 }
 
 func (f *CsvFormat) Flush() error { return nil }
