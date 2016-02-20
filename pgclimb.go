@@ -19,21 +19,12 @@ func changeHelpTemplateArgs(args string) {
 	cli.CommandHelpTemplate = strings.Replace(cli.CommandHelpTemplate, "[arguments...]", args, -1)
 }
 
-func isTplFile(arg string) bool {
-	return strings.HasSuffix(arg, ".tpl")
-}
-
-func parseTemplate(arg string) string {
-	if isTplFile(arg) {
-		filename := arg
-		rawTemplate, err := ioutil.ReadFile(filename)
-		if err != nil {
-			log.Fatalln(err)
-		}
-		return string(rawTemplate)
-	} else {
-		return arg
+func parseTemplate(filename string) string {
+	rawTemplate, err := ioutil.ReadFile(filename)
+	if err != nil {
+		log.Fatalln(err)
 	}
+	return string(rawTemplate)
 }
 
 func parseWriter(c *cli.Context) io.Writer {

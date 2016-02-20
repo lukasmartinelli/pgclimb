@@ -82,6 +82,27 @@ function test_excel_export() {
     echo "Exported Excel employees sheet to $filename"
 }
 
+function test_templates() {
+    local query="SELECT * FROM employee_salaries"
+    local template="salaries_report.tpl"
+    local filename="salaries_report.html"
+
+    echo -e '<!DOCTYPE html><html>' > $template
+    echo -e '<head><title>Montgomery County MD Employees</title></head>' >> $template
+    echo -e '<body>' >> $template
+    echo -e '<h2>Employees</h2>' >> $template
+    echo -e '<ul>' >> $template
+    echo -e '{{range .}}' >> $template
+    echo -e '<li>{{.full_name}}</li>' >> $template
+    echo -e '{{end}}' >> $template
+    echo -e '</ul>' >> $template
+    echo -e '</body>' >> $template
+    echo -e '</html>' >> $template
+
+    pgclimb -d $DB_NAME -U $DB_USER -c "$query" -o "$filename" template "$template"
+    echo "Exported template $template to $filename"
+}
+
 
 function test_json_doc_export {
     local query="SELECT e.data FROM github_events e WHERE e.data->>'type' = 'PushEvent'"
@@ -105,6 +126,7 @@ function main() {
     test_csv_export
     test_json_lines_export
     test_json_doc_export
+    test_templates
     test_excel_export
 }
 
