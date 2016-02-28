@@ -134,12 +134,18 @@ pgclimb -o salary_report.xlsx \
 
 ### XML
 
-You can output XML to process it with other programs like [XLST](http://www.w3schools.com/xsl/). To have more control over the XML output you should use the `pgclimb` template functionality directly to generate XML or build your own XML document with [XML functions in PostgreSQL](https://wiki.postgresql.org/wiki/XML_Support).
+You can output XML to process it with other programs like [XLST](http://www.w3schools.com/xsl/).
+To have more control over the XML output you should use the `pgclimb` template functionality directly to generate XML or build your own XML document with [XML functions in PostgreSQL](https://wiki.postgresql.org/wiki/XML_Support).
 
 ```bash
 # Output XML for each row
 pgclimb -o salaries.xml -c "SELECT * FROM employee_salaries" xml
 ```
+
+A good default XML export is currently lacking because the XML format
+can be controlled using templates.
+If there is enough demand I will implement a solid
+default XML support without relying on templates.
 
 ## Templates
 
@@ -164,16 +170,12 @@ Create a template `salaries.tpl`.
 </html>
 ```
 
-Create a query file `query.sql`
-
-```sql
-SELECT * FROM employee_salaries
-```
-
 And now run the template.
 
 ```
-pgclimb -f query.sql -o salaries.html template salaries.tpl
+pgclimb -o salaries.html \
+    -c "SELECT * FROM employee_salaries" \
+    template salaries.tpl
 ```
 
 ## Database Connection
@@ -181,14 +183,13 @@ pgclimb -f query.sql -o salaries.html template salaries.tpl
 Database connection details can be provided via environment variables
 or as separate flags (same flags as `psql`).
 
-name        | default     | description
-------------|-------------|------------------------------
-`DB_NAME`   | `postgres`  | database name
-`DB_HOST`   | `localhost` | host name
-`DB_PORT`   | `5432`      | port
-`DB_SCHEMA` | `import`    | schema to create tables for
-`DB_USER`   | `postgres`  | database user
-`DB_PASS`   |             | password (or empty if none)
+name        | default     | flags               | description
+------------|-------------|---------------------|-----------------
+`DB_NAME`   | `postgres`  | `-d`, `--dbname`    | database name
+`DB_HOST`   | `localhost` | `-h`, `--host`      | host name
+`DB_PORT`   | `5432`      | `-p`, `--port`      | port
+`DB_USER`   | `postgres`  | `-U`, `--username`  | database user
+`DB_PASS`   |             | `--pass`            | password (or empty if none)
 
 ## Advanced Use Cases
 
