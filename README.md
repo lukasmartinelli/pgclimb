@@ -13,8 +13,9 @@ Use Cases:
 - `psql` alternative for getting data out of PostgreSQL
 - Publish data sets
 - Create Excel reports from the database
-- Generate HTML repors
-- Transform data to JSON for graphing it JavaScript libraries
+- Generate HTML reports
+- Export XML data for further processing with XSLT
+- Transform data to JSON for graphing it with JavaScript libraries
 - Generate readonly JSON APIs
 
 ## Install
@@ -50,7 +51,7 @@ yourself](https://github.com/lukasmartinelli/pgclimb/releases/latest).
 
 ## Supported Formats
 
-The example queries operate on the open data [employee salaries of Montgomery County Maryland](https://data.montgomerycountymd.gov/Human-Resources/Employee-Salaries-2014/54rh-89p8).
+The example queries operate on the open data [employee salaries of Montgomery County Maryland](https://data.montgomerycountymd.gov/api/views/54rh-89p8/rows.csv). You can import CSV files into your database using [my PostgreSQL import tool pgfutter](http://github.com/lukasmartinelli/pgfutter).
 To connect to your beloved PostgreSQL database set the [appropriate connection options](#database-connection).
 
 ### CSV and TSV
@@ -62,8 +63,7 @@ Exporting CSV and TSV files is very similar to using `psql` and the `COPY TO` st
 pgclimb -c "SELECT * FROM employee_salaries" csv
 
 # Save CSV file with custom delimiter and header row to file
-pgclimb
-    -o salaries.csv \
+pgclimb -o salaries.csv \
     -c "SELECT full_name, position_title FROM employee_salaries" \
     csv --delimiter ";" --header
 
@@ -95,8 +95,7 @@ ORDER BY 1
 EOF
 
 # Load query from file and store it as JSON array in file
-pgclimb \
-    -f employees_by_position.sql \
+pgclimb -f employees_by_position.sql \
     -o employees_by_position.json \
     json
 ```
@@ -112,7 +111,7 @@ Instead of storing the entire JSON array each line is a valid JSON object.
 pgclimb -c "SELECT * FROM employee_salaries" jsonlines
 
 # In this example we interface with jq to pluck the first employee of each position
-pgclimb -f employees_by_position.sql json | jq '.employees[0].full_name'
+pgclimb -f employees_by_position.sql jsonlines | jq '.employees[0].full_name'
 ```
 
 ### XLSX
@@ -125,10 +124,10 @@ and create graphs and filters. You can fill different datasets into different sp
 pgclimb -o salaries.xlsx -c "SELECT * FROM employee_salaries" xlsx
 
 # Create XLSX file with multiple sheets
-pgclimb \
+pgclimb -o salary_report.xlsx \
     -c "SELECT DISTINCT position_title FROM employee_salaries" \
     xlsx --sheet "positions"
-pgclimb \
+pgclimb -o salary_report.xlsx \
     -c "SELECT full_name FROM employee_salaries" \
     xlsx --sheet "employees"
 ```
