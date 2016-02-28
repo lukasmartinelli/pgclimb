@@ -186,7 +186,7 @@ or as separate flags (same flags as `psql`).
 name        | default     | flags               | description
 ------------|-------------|---------------------|-----------------
 `DB_NAME`   | `postgres`  | `-d`, `--dbname`    | database name
-`DB_HOST`   | `localhost` | `-h`, `--host`      | host name
+`DB_HOST`   | `localhost` | `--host`            | host name
 `DB_PORT`   | `5432`      | `-p`, `--port`      | port
 `DB_USER`   | `postgres`  | `-U`, `--username`  | database user
 `DB_PASS`   |             | `--pass`            | password (or empty if none)
