@@ -4,6 +4,8 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io"
+	"strconv"
+	"time"
 )
 
 type XMLFormat struct {
@@ -36,6 +38,16 @@ func (e *XMLFormat) WriteRow(values map[string]interface{}) error {
 			charData = xml.CharData(string(value))
 		case int64:
 			charData = xml.CharData(fmt.Sprintf("%d", value))
+		case float64:
+			charData = xml.CharData(strconv.FormatFloat(value, 'f', -1, 64))
+		case time.Time:
+			charData = xml.CharData(value.Format(time.RFC3339))
+		case bool:
+			if value == true {
+				charData = xml.CharData("true")
+			} else {
+				charData = xml.CharData("false")
+			}
 		}
 		tokens = append(tokens, t, charData, t.End())
 	}
