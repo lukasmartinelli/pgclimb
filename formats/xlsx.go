@@ -2,9 +2,9 @@ package formats
 
 import (
 	"fmt"
-	"os"
-
 	"github.com/tealeg/xlsx"
+	"os"
+	"time"
 )
 
 type XlsxFormat struct {
@@ -67,6 +67,12 @@ func (f *XlsxFormat) WriteRow(values map[string]interface{}) error {
 			cell.SetString(string(value))
 		case int64:
 			cell.SetInt64(value)
+		case float64:
+			cell.SetFloat(value)
+		case time.Time:
+			cell.SetDate(value)
+		case bool:
+			cell.SetBool(value)
 		}
 	}
 	return nil

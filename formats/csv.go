@@ -4,6 +4,8 @@ import (
 	"encoding/csv"
 	"fmt"
 	"io"
+	"strconv"
+	"time"
 )
 
 type CsvFormat struct {
@@ -41,6 +43,16 @@ func (f *CsvFormat) WriteRow(values map[string]interface{}) error {
 			record = append(record, string(value))
 		case int64:
 			record = append(record, fmt.Sprintf("%d", value))
+		case float64:
+			record = append(record, strconv.FormatFloat(value, 'f', -1, 64))
+		case time.Time:
+			record = append(record, value.Format(time.RFC3339))
+		case bool:
+			if value == true {
+				record = append(record, "true")
+			} else {
+				record = append(record, "false")
+			}
 		}
 	}
 	err := f.writer.Write(record)
