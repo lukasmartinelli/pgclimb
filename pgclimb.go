@@ -136,7 +136,7 @@ func main() {
 		{
 			Name:  "template",
 			Usage: "Export data with custom template",
-			Action: func(c *cli.Context) {
+			Action: func(c *cli.Context) error {
 				changeHelpTemplateArgs("<template>")
 
 				templateArg := c.Args().First()
@@ -148,22 +148,25 @@ func main() {
 				rawTemplate := parseTemplate(templateArg)
 				writer := parseWriter(c)
 				exportFormat(c, formats.NewTemplateFormat(writer, rawTemplate))
+				return nil
 			},
 		},
 		{
 			Name:  "jsonlines",
 			Usage: "Export newline-delimited JSON objects",
-			Action: func(c *cli.Context) {
+			Action: func(c *cli.Context) error {
 				format := formats.NewJSONLinesFormat(parseWriter(c))
 				exportFormat(c, format)
+				return nil
 			},
 		},
 		{
 			Name:  "json",
 			Usage: "Export JSON document",
-			Action: func(c *cli.Context) {
+			Action: func(c *cli.Context) error {
 				format := formats.NewJSONArrayFormat(parseWriter(c))
 				exportFormat(c, format)
+				return nil
 			},
 		},
 		{
@@ -180,7 +183,7 @@ func main() {
 					Usage: "output header row",
 				},
 			},
-			Action: func(c *cli.Context) {
+			Action: func(c *cli.Context) error {
 				delimiter, _ := utf8.DecodeRuneInString(c.String("delimiter"))
 				format := formats.NewCsvFormat(
 					parseWriter(c),
@@ -188,6 +191,7 @@ func main() {
 					c.Bool("header"),
 				)
 				exportFormat(c, format)
+				return nil
 			},
 		},
 		{
@@ -199,21 +203,23 @@ func main() {
 					Usage: "output header row",
 				},
 			},
-			Action: func(c *cli.Context) {
+			Action: func(c *cli.Context) error {
 				format := formats.NewCsvFormat(
 					parseWriter(c),
 					'\t',
 					c.Bool("header"),
 				)
 				exportFormat(c, format)
+				return nil
 			},
 		},
 		{
 			Name:  "xml",
 			Usage: "Export XML",
-			Action: func(c *cli.Context) {
+			Action: func(c *cli.Context) error {
 				format := formats.NewXMLFormat(parseWriter(c))
 				exportFormat(c, format)
+				return nil
 			},
 		},
 		{
@@ -226,13 +232,14 @@ func main() {
 					Usage: "spreadsheet name",
 				},
 			},
-			Action: func(c *cli.Context) {
+			Action: func(c *cli.Context) error {
 				format, err := formats.NewXlsxFormat(
 					c.GlobalString("output"),
 					c.String("sheet"),
 				)
 				exitOnError(err)
 				exportFormat(c, format)
+				return nil
 			},
 		},
 	}
