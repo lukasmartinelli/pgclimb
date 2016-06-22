@@ -10,9 +10,9 @@ import (
 	"unicode/utf8"
 
 	"github.com/andrew-d/go-termutil"
-	"github.com/codegangsta/cli"
 	"github.com/lukasmartinelli/pgclimb/formats"
 	"github.com/lukasmartinelli/pgclimb/pg"
+	"github.com/urfave/cli"
 )
 
 func changeHelpTemplateArgs(args string) {

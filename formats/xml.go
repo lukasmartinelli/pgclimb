@@ -34,6 +34,8 @@ func (e *XMLFormat) WriteRow(values map[string]interface{}) error {
 		t := xml.StartElement{Name: xml.Name{"", key}}
 
 		switch value := (value).(type) {
+		case string:
+			charData = xml.CharData(value)
 		case []byte:
 			charData = xml.CharData(string(value))
 		case int64:

@@ -5,8 +5,8 @@ import (
 
 	"github.com/jmoiron/sqlx"
 
-	"github.com/codegangsta/cli"
 	_ "github.com/lib/pq"
+	"github.com/urfave/cli"
 )
 
 //setup a database connection and create the import schema

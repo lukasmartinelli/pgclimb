@@ -39,6 +39,8 @@ func (f *CsvFormat) WriteRow(values map[string]interface{}) error {
 	record := []string{}
 	for _, col := range f.columns {
 		switch value := (values[col]).(type) {
+		case string:
+			record = append(record, value)
 		case []byte:
 			record = append(record, string(value))
 		case int64:
