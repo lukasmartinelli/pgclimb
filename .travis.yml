@@ -6,7 +6,12 @@ go:
   - 1.4
   - tip
 install:
-  - go get
+  - go get github.com/codegangsta/cli
+  - go get github.com/lib/pq
+  - go get github.com/jmoiron/sqlx
+  - go get github.com/tealeg/xlsx
+  - go get github.com/lukasmartinelli/pgfutter
+  - go get github.com/andrew-d/go-termutil
 script:
   - go install
   - ./test.sh
