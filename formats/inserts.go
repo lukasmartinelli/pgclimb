@@ -72,6 +72,8 @@ func (f *InsertsFormat) WriteRow(values map[string]interface{}) error {
 			} else {
 				record = append(record, "false")
 			}
+		case nil:
+			record = append(record, "null")
 		}
 	}
 	buf.WriteString("VALUES (")
