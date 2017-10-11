@@ -242,6 +242,27 @@ func main() {
 				return nil
 			},
 		},
+		{
+			Name:  "inserts",
+			Usage: "Export INSERT statements",
+			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name:  "table",
+					Value: "data",
+					Usage: "table name",
+				},
+			},
+			Action: func(c *cli.Context) error {
+				format, err := formats.NewInsertsFormat(
+					parseWriter(c),
+					c.GlobalString("output"),
+					c.String("table"),
+				)
+				exitOnError(err)
+				exportFormat(c, format)
+				return nil
+			},
+		},
 	}
 
 	app.Run(os.Args)
