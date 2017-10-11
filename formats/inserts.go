@@ -20,7 +20,7 @@ const (
 // very simple quoting for sql values
 func quote(val string) string {
 	buf := bytes.NewBufferString("'")
-	buf.WriteString(strings.Replace(val, "'", "\\'", -1))
+	buf.WriteString(strings.Replace(val, "'", "''", -1))
 	buf.WriteString("'")
 	return buf.String()
 }
