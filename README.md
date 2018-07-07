@@ -253,7 +253,7 @@ We use [gox](https://github.com/mitchellh/gox) to create distributable
 binaries for Windows, OSX and Linux.
 
 ```bash
-docker run --rm -v "$(pwd)":/usr/src/pgclimb -w /usr/src/pgclimb tcnksm/gox:1.4.2-light
+docker run --rm -v "$(pwd)":/usr/src/pgclimb -w /usr/src/pgclimb tcnksm/gox:1.9
 ```
 
 ## Integration Tests
