@@ -3,7 +3,8 @@ sudo: false
 addons:
   postgresql: 9.3
 go:
-  - 1.4
+  - 1.8
+  - 1.9
   - tip
 install:
   - go get github.com/urfave/cli
