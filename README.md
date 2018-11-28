@@ -134,7 +134,7 @@ pgclimb -o salary_report.xlsx \
 
 ### XML
 
-You can output XML to process it with other programs like [XLST](http://www.w3schools.com/xsl/).
+You can output XML to process it with other programs like [XSLT](http://www.w3schools.com/xml/xsl_intro.asp).
 To have more control over the XML output you should use the `pgclimb` template functionality directly to generate XML or build your own XML document with [XML functions in PostgreSQL](https://wiki.postgresql.org/wiki/XML_Support).
 
 ```bash
