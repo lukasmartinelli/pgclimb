@@ -55,6 +55,8 @@ func (f *CsvFormat) WriteRow(values map[string]interface{}) error {
 			} else {
 				record = append(record, "false")
 			}
+		case nil:
+			record = append(record, "")
 		}
 	}
 	err := f.writer.Write(record)
